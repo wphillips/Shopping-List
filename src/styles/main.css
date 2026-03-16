@@ -1,0 +1,861 @@
+/* Dark theme variables */
+:root {
+  /* Background colors */
+  --bg-primary: #1a1a1a;
+  --bg-secondary: #2d2d2d;
+  --bg-tertiary: #3a3a3a;
+  --bg-hover: #404040;
+  
+  /* Text colors - ensuring WCAG AA contrast ratios */
+  --text-primary: #ffffff;
+  --text-secondary: #b0b0b0;
+  --text-disabled: #707070;
+  
+  /* Accent colors */
+  --accent: #4a9eff;
+  --accent-hover: #6bb0ff;
+  --accent-active: #2d8aef;
+  
+  /* Status colors */
+  --warning: #ff9800;
+  --error: #f44336;
+  
+  /* Border and divider colors */
+  --border: #404040;
+  --border-light: #505050;
+  
+  /* Interactive element colors */
+  --button-bg: #2d2d2d;
+  --button-hover: #3a3a3a;
+  --button-active: #252525;
+  
+  /* Checked item colors */
+  --checked-bg: #2a3a2a;
+  --checked-text: #90a090;
+}
+
+/* Reset and base styles */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+  line-height: 1.4;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+#app {
+  max-width: 1024px;
+  margin: 0 auto;
+  padding: 1rem;
+  min-height: 100vh;
+}
+
+/* Typography */
+h1 {
+  color: var(--text-primary);
+  margin-bottom: 0.5rem;
+  font-size: 1.25rem;
+  font-weight: 600;
+}
+
+h2 {
+  color: var(--text-primary);
+  font-size: 1.1rem;
+  font-weight: 500;
+}
+
+/* Input field styles */
+input[type="text"],
+input[type="search"],
+.input-field {
+  width: 100%;
+  padding: 0.5rem 0.75rem;
+  background-color: var(--bg-secondary);
+  color: var(--text-primary);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  font-size: 0.9375rem;
+  outline: none;
+  transition: border-color 0.2s ease, background-color 0.2s ease;
+  margin-bottom: 0.625rem;
+}
+
+input[type="text"]:focus,
+input[type="search"]:focus,
+.input-field:focus {
+  border-color: var(--accent);
+  background-color: var(--bg-tertiary);
+}
+
+input[type="text"]::placeholder,
+input[type="search"]::placeholder,
+.input-field::placeholder {
+  color: var(--text-secondary);
+}
+
+/* Button styles */
+button {
+  background-color: var(--button-bg);
+  color: var(--text-primary);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 0.5rem 1rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s ease, border-color 0.2s ease;
+  min-width: 44px;
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+button:hover {
+  background-color: var(--button-hover);
+  border-color: var(--border-light);
+}
+
+button:active {
+  background-color: var(--button-active);
+}
+
+button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+button.primary {
+  background-color: var(--accent);
+  border-color: var(--accent);
+  color: #ffffff;
+}
+
+button.primary:hover {
+  background-color: var(--accent-hover);
+  border-color: var(--accent-hover);
+}
+
+button.primary:active {
+  background-color: var(--accent-active);
+  border-color: var(--accent-active);
+}
+
+button.icon-only {
+  padding: 0.5rem;
+  min-width: 44px;
+  min-height: 44px;
+}
+
+button.danger {
+  color: var(--error);
+  border-color: var(--error);
+}
+
+button.danger:hover {
+  background-color: rgba(244, 67, 54, 0.1);
+}
+
+/* Section styles */
+.section {
+  background-color: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  margin-bottom: 0.625rem;
+  overflow: hidden;
+}
+
+.section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.5rem 0.75rem;
+  background-color: var(--bg-tertiary);
+  border-bottom: 1px solid var(--border);
+  cursor: pointer;
+  user-select: none;
+  min-height: 44px;
+}
+
+.section-header:hover {
+  background-color: var(--bg-hover);
+}
+
+.section-title {
+  font-size: 1rem;
+  font-weight: 500;
+  color: var(--text-primary);
+  flex: 1;
+}
+
+/* Inline rename input inside section title */
+.section-title input[type="text"] {
+  width: auto;
+  flex: 1;
+  margin-bottom: 0;
+  padding: 0.25rem 0.5rem;
+  font-size: 1rem;
+  font-weight: 500;
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+  border: 1px solid var(--accent);
+  border-radius: 4px;
+  outline: none;
+  min-height: auto;
+}
+
+.section-controls {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.section-content {
+  padding: 0;
+}
+
+.section.collapsed .section-content {
+  display: none;
+}
+
+/* Inline add input styles */
+.section-add-input {
+  width: 100%;
+  padding: 0.5rem 0.75rem;
+  background-color: transparent;
+  color: var(--text-primary);
+  border: 1px solid transparent;
+  border-radius: 4px;
+  font-size: 0.8125rem;
+  outline: none;
+  transition: border-color 0.2s ease, background-color 0.2s ease;
+  min-height: 44px;
+  box-sizing: border-box;
+}
+
+.section-add-input:focus {
+  border-color: var(--accent);
+  background-color: var(--bg-tertiary);
+}
+
+.section-add-input::placeholder {
+  color: var(--text-disabled);
+  font-style: italic;
+}
+
+/* Item styles */
+.item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 0.75rem;
+  border-bottom: 1px solid var(--border);
+  background-color: var(--bg-secondary);
+  transition: background-color 0.2s ease;
+}
+
+.item:last-child {
+  border-bottom: none;
+}
+
+.item:hover {
+  background-color: var(--bg-tertiary);
+}
+
+.item.checked {
+  background-color: var(--checked-bg);
+}
+
+.item.checked .item-name {
+  color: var(--checked-text);
+  text-decoration: line-through;
+}
+
+.item-checkbox {
+  min-width: 44px;
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.item-checkbox input[type="checkbox"] {
+  width: 24px;
+  height: 24px;
+  cursor: pointer;
+  accent-color: var(--accent);
+}
+
+.item-name {
+  flex: 1;
+  color: var(--text-primary);
+  font-size: 0.9375rem;
+  word-break: break-word;
+}
+
+.item-quantity {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.item-quantity-value {
+  min-width: 2rem;
+  text-align: center;
+  color: var(--text-secondary);
+  font-size: 0.875rem;
+}
+
+.item-controls {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+/* Filter control styles */
+.filter-control {
+  display: flex;
+  gap: 0.25rem;
+  margin-bottom: 0.5rem;
+  padding: 0.125rem;
+  background-color: var(--bg-secondary);
+  border-radius: 6px;
+  border: 1px solid var(--border);
+}
+
+.filter-control button {
+  flex: 1;
+  padding: 0.2rem 0.5rem;
+  min-height: 28px;
+  font-size: 0.75rem;
+}
+
+.filter-control button.active {
+  background-color: var(--accent);
+  border-color: var(--accent);
+  color: #ffffff;
+}
+
+/* Drag and drop styles */
+.item.dragging {
+  opacity: 0.5;
+}
+
+.section.drag-over {
+  border-color: var(--accent);
+  background-color: rgba(74, 158, 255, 0.1);
+}
+
+/* Empty state styles */
+.empty-state {
+  padding: 1rem;
+  text-align: center;
+  color: var(--text-secondary);
+}
+
+/* Utility classes */
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border-width: 0;
+}
+
+/* List selector — dropdown style */
+.list-selector {
+  position: relative;
+  flex: 1;
+  min-width: 0;
+}
+
+.list-selector__trigger {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  padding: 0.375rem 0.75rem;
+  background-color: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  cursor: pointer;
+  min-height: 44px;
+  max-width: 100%;
+  font-size: 0.9375rem;
+  font-weight: 500;
+  color: var(--text-primary);
+  transition: background-color 0.2s ease, border-color 0.2s ease;
+}
+
+.list-selector__trigger:hover {
+  background-color: var(--bg-tertiary);
+  border-color: var(--border-light);
+}
+
+.list-selector__name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.list-selector__arrow {
+  font-size: 0.625rem;
+  color: var(--text-secondary);
+  flex-shrink: 0;
+}
+
+.list-selector__dropdown {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  min-width: 220px;
+  max-width: 320px;
+  background-color: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+  z-index: 100;
+  overflow: hidden;
+}
+
+.list-selector__item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.5rem 0.75rem;
+  cursor: pointer;
+  min-height: 44px;
+  transition: background-color 0.15s ease;
+}
+
+.list-selector__item:hover {
+  background-color: var(--bg-tertiary);
+}
+
+.list-selector__item--active {
+  background-color: var(--bg-tertiary);
+  border-left: 3px solid var(--accent);
+}
+
+.list-selector__item-name {
+  flex: 1;
+  font-size: 0.875rem;
+  color: var(--text-primary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.list-selector__item-controls {
+  display: flex;
+  gap: 0.25rem;
+  flex-shrink: 0;
+}
+
+.list-selector__rename-btn,
+.list-selector__delete-btn {
+  background: none;
+  border: none;
+  color: var(--text-secondary);
+  font-size: 0.875rem;
+  padding: 0.25rem;
+  min-width: 32px;
+  min-height: 32px;
+  cursor: pointer;
+  border-radius: 4px;
+  transition: background-color 0.15s ease, color 0.15s ease;
+}
+
+.list-selector__rename-btn:hover {
+  background-color: var(--bg-hover);
+  color: var(--text-primary);
+}
+
+.list-selector__delete-btn:hover {
+  background-color: rgba(244, 67, 54, 0.15);
+  color: var(--error);
+}
+
+.list-selector__rename-input {
+  flex: 1;
+  padding: 0.125rem 0.375rem;
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+  border: 1px solid var(--accent);
+  border-radius: 4px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  outline: none;
+  margin-bottom: 0;
+  min-height: auto;
+}
+
+.list-selector__add {
+  display: block;
+  width: 100%;
+  padding: 0.5rem 0.75rem;
+  background: none;
+  border: none;
+  border-top: 1px solid var(--border);
+  color: var(--accent);
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  text-align: left;
+  min-height: 44px;
+  transition: background-color 0.15s ease;
+}
+
+.list-selector__add:hover {
+  background-color: var(--bg-tertiary);
+}
+
+/* Share button — icon style */
+.share-btn {
+  background-color: var(--bg-secondary);
+  border: 1px solid var(--border);
+  color: var(--text-primary);
+  padding: 0.375rem;
+  font-size: 1.125rem;
+  border-radius: 6px;
+  min-width: 44px;
+  min-height: 44px;
+  cursor: pointer;
+  transition: background-color 0.2s ease, border-color 0.2s ease;
+}
+
+.share-btn:hover {
+  background-color: var(--bg-tertiary);
+  border-color: var(--border-light);
+}
+
+.share-btn:active {
+  background-color: var(--button-active);
+}
+
+/* App header — list selector + share icon */
+.app-header {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+
+/* Responsive layouts */
+
+/* Mobile layout (< 768px) */
+@media (max-width: 767px) {
+  #app {
+    padding: 6px;
+  }
+
+  h1 {
+    font-size: 1.25rem;
+    margin-bottom: 0.75rem;
+  }
+
+  h2 {
+    font-size: 1.125rem;
+  }
+
+  /* Stack section controls vertically on very small screens */
+  .section-header {
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+
+  .section-controls {
+    flex-wrap: wrap;
+  }
+
+  /* Optimize item layout for mobile */
+  .item {
+    gap: 6px;
+    padding: 4px 0.5rem;
+  }
+
+  .item-checkbox {
+    min-width: 36px;
+    min-height: 36px;
+  }
+
+  .item-checkbox input[type="checkbox"] {
+    width: 20px;
+    height: 20px;
+  }
+
+  /* Make filter buttons stack on very small screens if needed */
+  .filter-control {
+    flex-wrap: wrap;
+    margin-bottom: 4px;
+    padding: 2px;
+  }
+
+  .filter-control button {
+    min-width: calc(33.333% - 0.25rem);
+    min-height: 28px;
+  }
+
+  /* Adjust input padding for mobile */
+  input[type="text"],
+  input[type="search"] {
+    padding: 6px 0.75rem;
+    font-size: 0.9375rem;
+    margin-bottom: 6px;
+  }
+
+  /* Ensure buttons remain touch-friendly */
+  button {
+    min-width: 32px;
+    min-height: 32px;
+  }
+
+  button.icon-only {
+    min-width: 32px;
+    min-height: 32px;
+    padding: 0.25rem;
+  }
+
+  /* Notification toast: slightly narrower bottom margin on mobile */
+  .notification {
+    bottom: 1rem;
+    font-size: 0.8125rem;
+  }
+
+  /* Optimize section spacing */
+  .section {
+    margin-bottom: 6px;
+  }
+
+  .section-add-input {
+    min-height: 36px;
+    padding: 6px 0.75rem;
+  }
+
+  .section-header {
+    min-height: 36px;
+    padding: 4px 0.5rem;
+  }
+
+  .section-controls button {
+    min-width: 36px;
+    min-height: 36px;
+  }
+
+  .section-title {
+    font-size: 0.9375rem;
+  }
+
+  .section-content {
+    padding: 0;
+  }
+
+  .item-quantity {
+    gap: 2px;
+  }
+
+  .item-quantity button {
+    min-width: 32px;
+    min-height: 32px;
+  }
+
+  .item-quantity-value {
+    font-size: 0.8125rem;
+  }
+
+  /* List selector mobile */
+  .list-selector__trigger {
+    min-height: 36px;
+    font-size: 0.875rem;
+  }
+
+  .list-selector__dropdown {
+    min-width: 200px;
+  }
+
+  /* Share button mobile */
+  .share-btn {
+    min-width: 36px;
+    min-height: 36px;
+    font-size: 1rem;
+  }
+}
+
+/* Tablet layout (768px - 1024px) */
+@media (min-width: 768px) and (max-width: 1024px) {
+  #app {
+    padding: 1rem;
+  }
+
+  /* Use flexbox for better tablet layout */
+  .section-header {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+  }
+
+  .section-controls {
+    display: flex;
+    gap: 0.75rem;
+  }
+
+  /* Optimize item layout for tablet */
+  .item {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.5rem 0.75rem;
+  }
+
+  /* Filter control optimized for tablet */
+  .filter-control {
+    display: flex;
+    gap: 0.5rem;
+    max-width: 600px;
+  }
+
+  .filter-control button {
+    flex: 1;
+    min-width: 100px;
+  }
+
+  /* Better spacing for tablet */
+  .section {
+    margin-bottom: 0.625rem;
+  }
+
+  /* Ensure all interactive elements meet minimum tap target */
+  button,
+  .item-checkbox,
+  input[type="checkbox"] {
+    min-width: 44px;
+    min-height: 44px;
+  }
+
+  /* List selector tablet */
+  .list-selector__trigger {
+    min-height: 44px;
+  }
+
+  .share-btn {
+    min-width: 44px;
+    min-height: 44px;
+  }
+}
+
+/* Desktop layout (> 1024px) */
+@media (min-width: 1025px) {
+  #app {
+    padding: 1.5rem;
+  }
+
+  /* Center content with max width */
+  .filter-control {
+    max-width: 600px;
+  }
+
+  /* Optimize spacing for larger screens */
+  .section {
+    margin-bottom: 0.75rem;
+  }
+
+  .item {
+    padding: 0.5rem 1rem;
+  }
+
+  .section-header {
+    padding: 0.625rem 1rem;
+  }
+}
+
+/* App footer */
+.app-footer {
+  text-align: center;
+  padding: 1.5rem 0 0.5rem;
+}
+
+/* Update button — subtle footer text link */
+.update-btn {
+  background: none;
+  border: none;
+  color: var(--text-disabled);
+  font-size: 0.75rem;
+  font-weight: 400;
+  padding: 0.5rem 1rem;
+  cursor: pointer;
+  min-width: auto;
+  min-height: auto;
+  transition: color 0.2s ease;
+}
+
+.update-btn:hover {
+  color: var(--text-secondary);
+  background: none;
+  border: none;
+  text-decoration: underline;
+}
+
+.update-btn:active {
+  color: var(--text-primary);
+  background: none;
+  border: none;
+}
+
+.update-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Notification toast */
+.notification {
+  position: fixed;
+  bottom: 1.5rem;
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 0.75rem 1.25rem;
+  border-radius: 8px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #ffffff;
+  z-index: 1000;
+  animation: notification-fade-in 0.3s ease;
+  max-width: calc(100% - 2rem);
+  text-align: center;
+}
+
+.notification-info {
+  background-color: var(--accent);
+}
+
+.notification-warning {
+  background-color: var(--warning);
+  color: #1a1a1a;
+}
+
+.notification-error {
+  background-color: var(--error);
+}
+
+@keyframes notification-fade-in {
+  from {
+    opacity: 0;
+    transform: translateX(-50%) translateY(1rem);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+}
