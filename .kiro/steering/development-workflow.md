@@ -129,6 +129,25 @@ Run type checking:
 npx tsc --noEmit
 ```
 
+## Git Workflow
+
+### Branching
+
+- Before executing spec tasks, suggest creating a feature branch: `feat/{spec-name}` (e.g., `feat/aws-terraform-iac`)
+- For bugfix specs, use `fix/{spec-name}` (e.g., `fix/quantity-zero-crash`)
+- Branch from `main` unless the user specifies otherwise
+
+### Commits
+
+- Offer commits at logical milestones during spec task execution (e.g., after checkpoint tasks or completing a group of related tasks)
+- Use conventional commit messages:
+  - `feat: <description>` for new features
+  - `fix: <description>` for bug fixes
+  - `chore: <description>` for infrastructure, tooling, or maintenance
+  - `test: <description>` for test-only changes
+- Keep commits atomic — one logical change per commit when possible
+- Include the spec name or task reference in the commit body when relevant
+
 ## Code Review Checklist
 
 Before submitting changes:

@@ -1,0 +1,23 @@
+# Terraform Variables Example File
+# Requirements: 5.6, 10.5
+#
+# Copy this file to terraform.tfvars and update with your values.
+# IMPORTANT: terraform.tfvars should NOT be committed to version control.
+
+# Required: Prefix for the S3 bucket name
+# Must be lowercase alphanumeric with hyphens, not starting or ending with hyphen
+bucket_prefix = "my-grocery-pwa"
+
+# Optional: Custom domain for CloudFront distribution
+# Set to null or remove to use the default CloudFront domain
+# custom_domain = "grocery.example.com"
+custom_domain = null
+
+# Optional: Environment name for resource tagging
+# Default: "production"
+environment = "production"
+
+# Optional: AWS region for S3 bucket
+# Default: "us-west-2"
+# Note: CloudFront is global, but the S3 bucket will be created in this region
+aws_region = "us-west-2"
