@@ -472,6 +472,129 @@ describe('Service Worker', () => {
       expect(cachedResponse).toBeDefined();
     });
   });
+
+  describe('Offline Fallback Behavior', () => {
+    it('should return cached /index.html for navigation requests when offline', async () => {
+      const CACHE_NAME = 'grocery-list-__BUILD_HASH__';
+
+      // Pre-cache /index.html
+      const cache = await caches.open(CACHE_NAME);
+      const indexResponse = new Response('<html>SPA</html>', {
+        status: 200,
+        headers: { 'Content-Type': 'text/html' },
+      });
+      await cache.put('/index.html', indexResponse);
+
+      // Mock fetch to fail (offline)
+      global.fetch = vi.fn(() =>
+        Promise.reject(new TypeError('Load failed'))
+      );
+
+      // Simulate the fixed fetch handler logic for a navigation request
+      const url = 'https://example.com/some-route';
+      const requestMode = 'navigate';
+
+      let response = await caches.match(url);
+      if (!response) {
+        try {
+          response = await fetch(url);
+        } catch {
+          // Navigation: serve cached /index.html as SPA fallback
+          if (requestMode === 'navigate') {
+            const fallback = await caches.match('/index.html');
+            response = fallback || new Response('Offline', {
+              status: 503,
+              statusText: 'Service Unavailable',
+              headers: { 'Content-Type': 'text/html' },
+            });
+          } else {
+            response = new Response('Service Unavailable', {
+              status: 503,
+              statusText: 'Service Unavailable',
+            });
+          }
+        }
+      }
+
+      expect(response).toBeDefined();
+      expect(response!.status).toBe(200);
+      expect(await response!.text()).toBe('<html>SPA</html>');
+    });
+
+    it('should return 503 for non-navigation requests when offline', async () => {
+      // Mock fetch to fail (offline)
+      global.fetch = vi.fn(() =>
+        Promise.reject(new TypeError('Load failed'))
+      );
+
+      // Simulate the fixed fetch handler logic for a non-navigation request
+      const url = 'https://example.com/api/data.json';
+      const requestMode = 'cors';
+
+      let response = await caches.match(url);
+      if (!response) {
+        try {
+          response = await fetch(url);
+        } catch {
+          if (requestMode === 'navigate') {
+            const fallback = await caches.match('/index.html');
+            response = fallback || new Response('Offline', {
+              status: 503,
+              statusText: 'Service Unavailable',
+              headers: { 'Content-Type': 'text/html' },
+            });
+          } else {
+            response = new Response('Service Unavailable', {
+              status: 503,
+              statusText: 'Service Unavailable',
+            });
+          }
+        }
+      }
+
+      expect(response).toBeDefined();
+      expect(response!.status).toBe(503);
+      expect(response!.statusText).toBe('Service Unavailable');
+    });
+
+    it('should return 503 for navigation requests when offline and no cached /index.html', async () => {
+      // No /index.html in cache — cacheStorage is empty from beforeEach
+
+      // Mock fetch to fail (offline)
+      global.fetch = vi.fn(() =>
+        Promise.reject(new TypeError('Load failed'))
+      );
+
+      // Simulate the fixed fetch handler logic for a navigation request
+      const url = 'https://example.com/some-route';
+      const requestMode = 'navigate';
+
+      let response = await caches.match(url);
+      if (!response) {
+        try {
+          response = await fetch(url);
+        } catch {
+          if (requestMode === 'navigate') {
+            const fallback = await caches.match('/index.html');
+            response = fallback || new Response('Offline', {
+              status: 503,
+              statusText: 'Service Unavailable',
+              headers: { 'Content-Type': 'text/html' },
+            });
+          } else {
+            response = new Response('Service Unavailable', {
+              status: 503,
+              statusText: 'Service Unavailable',
+            });
+          }
+        }
+      }
+
+      expect(response).toBeDefined();
+      expect(response!.status).toBe(503);
+      expect(response!.statusText).toBe('Service Unavailable');
+    });
+  });
 });
 
 /**

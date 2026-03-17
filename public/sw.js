@@ -80,7 +80,23 @@ self.addEventListener('fetch', (event) => {
           })
           .catch((error) => {
             console.error('[Service Worker] Fetch failed:', error);
-            throw error;
+            
+            // Navigation: serve cached /index.html as SPA fallback
+            if (event.request.mode === 'navigate') {
+              return caches.match('/index.html').then((fallback) => {
+                return fallback || new Response('Offline', {
+                  status: 503,
+                  statusText: 'Service Unavailable',
+                  headers: { 'Content-Type': 'text/html' }
+                });
+              });
+            }
+            
+            // Non-navigation: return 503
+            return new Response('Service Unavailable', {
+              status: 503,
+              statusText: 'Service Unavailable'
+            });
           });
       })
   );
