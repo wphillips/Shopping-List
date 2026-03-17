@@ -12,6 +12,15 @@ import { serialize } from './serializer';
 import { encodeListUrl } from './url-codec';
 import { shareList, ShareDeps } from './share-controller';
 import { checkImportUrl, ImportDeps } from './import-controller';
+import {
+  shouldShowInstallPrompt,
+  isIOSSafari,
+  setDismissed,
+  InstallPromptBanner,
+  BeforeInstallPromptEvent,
+  DetectDeps,
+  DismissalDeps,
+} from './install-prompt';
 
 /**
  * AppShell class - Main application component
@@ -32,6 +41,7 @@ class AppShell {
   private sectionCountBeforeAdd: number = 0;
   private swRegistration: ServiceWorkerRegistration | null = null;
   private updateButton: HTMLButtonElement;
+  private deferredPrompt: BeforeInstallPromptEvent | null = null;
 
   constructor(appContainer: HTMLElement) {
     this.appContainer = appContainer;
@@ -91,6 +101,12 @@ class AppShell {
     
     // Subscribe to state changes for re-rendering
     this.stateManager.subscribe(this.handleStateChange.bind(this));
+
+    // Capture beforeinstallprompt event for PWA install banner
+    window.addEventListener('beforeinstallprompt', (e) => {
+      e.preventDefault();
+      this.deferredPrompt = e as BeforeInstallPromptEvent;
+    });
 
     // Check for shared list in URL on init
     this.handleImport();
@@ -222,6 +238,43 @@ class AppShell {
 
     if (confirmed) {
       this.stateManager.dispatch({ type: 'IMPORT_LIST', list: result.list });
+      this.showInstallBannerIfEligible();
+    }
+  }
+
+  /**
+   * Show the PWA install banner if the device/context conditions are met.
+   */
+  private showInstallBannerIfEligible(): void {
+    const detectDeps: DetectDeps = {
+      userAgent: navigator.userAgent,
+      maxTouchPoints: navigator.maxTouchPoints,
+      matchMedia: (q) => window.matchMedia(q),
+      standalone: (navigator as any).standalone,
+    };
+    const dismissalDeps: DismissalDeps = {
+      getItem: (k) => localStorage.getItem(k),
+      setItem: (k, v) => localStorage.setItem(k, v),
+    };
+
+    if (!shouldShowInstallPrompt(detectDeps, dismissalDeps)) return;
+
+    const banner = new InstallPromptBanner({
+      deferredPrompt: this.deferredPrompt,
+      isIOS: isIOSSafari(detectDeps),
+      onDismiss: () => {
+        setDismissed(dismissalDeps);
+        banner.remove();
+      },
+      onInstallAccepted: () => {
+        setDismissed(dismissalDeps);
+        banner.remove();
+      },
+    });
+
+    const appShell = this.appContainer.querySelector('.app-shell');
+    if (appShell) {
+      appShell.appendChild(banner.getElement());
     }
   }
 
