@@ -133,8 +133,9 @@ npx tsc --noEmit
 
 ### Branching
 
-- Before executing spec tasks, suggest creating a feature branch: `feat/{spec-name}` (e.g., `feat/aws-terraform-iac`)
+- ALWAYS create a feature branch BEFORE starting any spec work (including requirements): `feat/{spec-name}` (e.g., `feat/aws-terraform-iac`)
 - For bugfix specs, use `fix/{spec-name}` (e.g., `fix/quantity-zero-crash`)
+- This is the FIRST step — before creating any files or documents
 - Branch from `main` unless the user specifies otherwise
 
 ### Commits
@@ -152,6 +153,20 @@ npx tsc --noEmit
 
 - After all spec tasks are complete and committed, offer to push to the remote (`git push origin <branch>`)
 - Remind the user that commits are local-only until pushed
+
+### Merge and Deploy
+
+After all spec tasks are complete, tests pass, and the branch is pushed:
+
+1. **Prompt the user** to merge into `main` and deploy
+2. If approved:
+   - Checkout `main`, merge the feature/fix branch with `--no-ff`, and push `main` to origin
+   - Build for production: `npx vite build`
+   - Deploy to S3: `aws s3 sync dist/ s3://shopping-app-pwa-8f1e306a --delete --region us-west-2`
+   - Invalidate CloudFront: `aws cloudfront create-invalidation --distribution-id E1GNSB6NAC6Z1Q --paths "/*" --region us-west-2`
+3. Confirm deployment succeeded and the site is live
+
+This is the FINAL step of every spec — do not skip it or leave the user without a prompt.
 
 ## Code Review Checklist
 
