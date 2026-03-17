@@ -20,6 +20,15 @@ A Progressive Web App for managing grocery shopping lists with offline functiona
 - Responsive design for mobile and tablet
 - Storage quota error handling with user notifications
 
+## Build Timestamp
+
+The app displays a build timestamp in the footer so you can verify which build is running. The timestamp is injected at build time via Vite's `define` config, which replaces the `__BUILD_TIMESTAMP__` global constant in the bundle.
+
+- Production builds show the full timestamp (e.g. "Built Mar 16, 2026 9:45 PM")
+- In development mode the timestamp shows "Built dev"
+
+The "up to date" notification also includes a short-form timestamp (without the year) when the app confirms it is current.
+
 ## Development
 
 ### Prerequisites

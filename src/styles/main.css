@@ -821,6 +821,13 @@ button.danger:hover {
   padding: 1.5rem 0 0.5rem;
 }
 
+.build-timestamp {
+  display: block;
+  font-size: 0.75rem;
+  color: var(--text-disabled);
+  margin-bottom: 0.25rem;
+}
+
 /* Update button — subtle footer text link */
 .update-btn {
   background: none;

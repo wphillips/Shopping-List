@@ -8,6 +8,7 @@ import { Section } from './components/Section';
 import { Item } from './components/Item';
 import { AppState, MultiListState, GroceryList } from './types';
 import { forceUpdate } from './forceUpdate';
+import { toShortTimestamp } from './build-timestamp';
 import { serialize } from './serializer';
 import { encodeListUrl } from './url-codec';
 import { shareList, ShareDeps } from './share-controller';
@@ -128,7 +129,9 @@ class AppShell {
         <div id="input-container"></div>
         <div id="filter-container"></div>
         <main id="sections-container" class="sections-container"></main>
-        <footer id="app-footer" class="app-footer"></footer>
+        <footer id="app-footer" class="app-footer">
+          <span class="build-timestamp">${__BUILD_TIMESTAMP__}</span>
+        </footer>
       </div>
     `;
   }
@@ -578,7 +581,7 @@ class AppShell {
         this.updateButton.textContent = 'Update App';
         break;
       case 'up-to-date':
-        this.showNotification('App is already up to date.', 'info');
+        this.showNotification(`App is up to date (${toShortTimestamp(__BUILD_TIMESTAMP__)})`, 'info');
         this.updateButton.disabled = false;
         this.updateButton.textContent = 'Update App';
         break;
