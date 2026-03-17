@@ -203,8 +203,6 @@ describe('AppShell Force Update Integration', () => {
 
     await import('../src/index');
 
-    const appShell = (window as any).__appShell;
-
     // Wait for the async registerServiceWorker().then(reg => setSwRegistration(reg)) to settle
     await vi.waitFor(() => {
       // Access the stored registration via the public setter's effect
@@ -272,8 +270,6 @@ describe('AppShell Force Update Integration', () => {
     document.body.appendChild(app);
 
     await import('../src/index');
-
-    const appShell = (window as any).__appShell;
 
     // Wait for the rejected registerServiceWorker promise to settle
     // and null to be stored via setSwRegistration(null)

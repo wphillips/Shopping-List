@@ -78,14 +78,14 @@ describe('Service Worker', () => {
     } as any;
 
     // Mock fetch
-    global.fetch = vi.fn((request: Request | string) => {
+    global.fetch = vi.fn((_request: Request | string) => {
       return Promise.resolve(
         new Response('network content', {
           status: 200,
           headers: { 'Content-Type': 'text/html' },
         })
       );
-    });
+    }) as typeof fetch;
   });
 
   afterEach(() => {
@@ -265,7 +265,6 @@ describe('Service Worker', () => {
     });
 
     it('should not cache failed network responses', async () => {
-      const CACHE_NAME = 'grocery-list-__BUILD_HASH__';
       const url = 'https://example.com/error.html';
 
       // Mock fetch to return error response
@@ -281,7 +280,6 @@ describe('Service Worker', () => {
       expect(networkResponse.status).toBe(404);
 
       // Should not cache 404 responses
-      const cache = await caches.open(CACHE_NAME);
       const shouldCache = networkResponse.status === 200;
       expect(shouldCache).toBe(false);
     });

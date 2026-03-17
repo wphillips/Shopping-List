@@ -5,7 +5,7 @@
 
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { FilterControl } from '../src/components/FilterControl';
-
+import { FilterMode } from '../src/types';
 describe('FilterControl Component', () => {
   let filterControl: FilterControl;
   let onFilterChangeMock: ReturnType<typeof vi.fn>;
@@ -15,7 +15,7 @@ describe('FilterControl Component', () => {
     
     filterControl = new FilterControl({
       currentFilter: 'all',
-      onFilterChange: onFilterChangeMock,
+      onFilterChange: onFilterChangeMock as (mode: FilterMode) => void,
     });
   });
 
@@ -126,7 +126,7 @@ describe('FilterControl Component', () => {
       // Start with unchecked filter
       const uncheckedFilter = new FilterControl({
         currentFilter: 'unchecked',
-        onFilterChange: onFilterChangeMock,
+        onFilterChange: onFilterChangeMock as (mode: FilterMode) => void,
       });
       
       const element = uncheckedFilter.getElement();

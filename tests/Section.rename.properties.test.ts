@@ -4,7 +4,7 @@
  * Uses fast-check with minimum 100 iterations per property
  */
 
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, vi } from 'vitest';
 import * as fc from 'fast-check';
 import { Section, SectionConfig } from '../src/components/Section';
 

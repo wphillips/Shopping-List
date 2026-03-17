@@ -4,7 +4,7 @@
  * Uses fast-check with minimum 100 iterations per property
  */
 
-import { describe, it, expect, beforeEach } from 'vitest';
+import { describe, it, expect } from 'vitest';
 import * as fc from 'fast-check';
 import { StateManager } from '../src/state';
 import { MultiListState } from '../src/types';
@@ -416,7 +416,6 @@ describe('Section Management Properties', () => {
             const sectionToDelete = sectionIds[deleteIndex];
 
             const beforeState = stateManager.getState();
-            const itemsInDeletedSection = al(beforeState).items.filter(item => item.sectionId === sectionToDelete).length;
             const itemsInOtherSections = al(beforeState).items.filter(item => item.sectionId !== sectionToDelete).length;
 
             // Delete the section
@@ -1506,7 +1505,6 @@ describe('Filtering Properties', () => {
             });
 
             // All items that contain the search text should be in the filtered results
-            const state = stateManager.getState();
             const visibleItems = stateManager.getVisibleItems();
             const expectedMatches = visibleItems.filter(item =>
               item.name.toLowerCase().includes(normalizedSearch)

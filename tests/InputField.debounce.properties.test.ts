@@ -41,8 +41,8 @@ describe('Property 1: Debounce coalesces keystrokes into a single delayed callba
 
           const inputField = new InputField({
             placeholder: 'Test',
-            onInput: onInputMock,
-            onSubmit: onSubmitMock,
+            onInput: onInputMock as (text: string) => void,
+            onSubmit: onSubmitMock as (text: string) => void,
           });
 
           const el = inputField.getElement();
@@ -115,8 +115,8 @@ describe('Property 2: Submit immediately fires and cancels pending debounce', ()
 
           const inputField = new InputField({
             placeholder: 'Test',
-            onInput: onInputMock,
-            onSubmit: onSubmitMock,
+            onInput: onInputMock as (text: string) => void,
+            onSubmit: onSubmitMock as (text: string) => void,
           });
 
           const el = inputField.getElement();
@@ -189,8 +189,8 @@ describe('Property 3: Empty input bypasses debounce', () => {
 
           const inputField = new InputField({
             placeholder: 'Test',
-            onInput: onInputMock,
-            onSubmit: onSubmitMock,
+            onInput: onInputMock as (text: string) => void,
+            onSubmit: onSubmitMock as (text: string) => void,
           });
 
           const el = inputField.getElement();
@@ -259,8 +259,8 @@ describe('Property 4: Destroy prevents stale callbacks', () => {
 
           const inputField = new InputField({
             placeholder: 'Test',
-            onInput: onInputMock,
-            onSubmit: onSubmitMock,
+            onInput: onInputMock as (text: string) => void,
+            onSubmit: onSubmitMock as (text: string) => void,
           });
 
           const el = inputField.getElement();

@@ -18,8 +18,8 @@ describe('InputField Debounce Behavior', () => {
 
     inputField = new InputField({
       placeholder: 'Add item or search...',
-      onInput: onInputMock,
-      onSubmit: onSubmitMock,
+      onInput: onInputMock as (text: string) => void,
+      onSubmit: onSubmitMock as (text: string) => void,
     });
   });
 

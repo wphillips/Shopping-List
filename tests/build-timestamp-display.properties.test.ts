@@ -36,7 +36,8 @@ describe('Feature: build-timestamp-display, Property 1: Build timestamp format v
 
     fc.assert(
       fc.property(
-        fc.date({ min: new Date('2000-01-01T00:00:00Z'), max: new Date('2099-12-31T23:59:59Z') }),
+        fc.date({ min: new Date('2000-01-01T00:00:00Z'), max: new Date('2099-12-31T23:59:59Z') })
+          .filter(d => !isNaN(d.getTime())),
         (date) => {
           const result = formatBuildTimestamp(date);
           expect(result).toMatch(pattern);

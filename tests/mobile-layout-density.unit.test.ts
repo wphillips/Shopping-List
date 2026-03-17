@@ -5,7 +5,7 @@
  */
 
 import { describe, it, expect, beforeAll } from 'vitest';
-import postcss, { Root, AtRule, Rule, Declaration } from 'postcss';
+import postcss, { Root, AtRule, Rule } from 'postcss';
 import { readFileSync } from 'fs';
 import { resolve } from 'path';
 

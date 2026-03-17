@@ -6,7 +6,7 @@ import { FilterControl } from './components/FilterControl';
 import { ListSelector } from './components/ListSelector';
 import { Section } from './components/Section';
 import { Item } from './components/Item';
-import { AppState, MultiListState, GroceryList } from './types';
+import { MultiListState } from './types';
 import { forceUpdate } from './forceUpdate';
 import { toShortTimestamp } from './build-timestamp';
 import { serialize } from './serializer';

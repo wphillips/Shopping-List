@@ -93,12 +93,9 @@ function simulateHandleItemSubmit(stateManager: StateManager, text: string): voi
 }
 
 describe('Bug Condition Exploration: No Sections Item Add', () => {
-  let stateManager: StateManager;
-
   beforeEach(() => {
     vi.clearAllMocks();
     // Initialize with empty state (no sections) — the bug condition
-    stateManager = new StateManager();
   });
 
   it('Property 1: Bug Condition — should create default section and add item when sections array is empty', () => {
