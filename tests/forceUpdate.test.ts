@@ -60,7 +60,7 @@ describe('forceUpdate', () => {
     expect(reload).not.toHaveBeenCalled();
   });
 
-  // Req 2.3: update() rejects → error status with message
+  // Req 2.3: update() rejects → error status with message, no reload
   it('returns error status with message when update() rejects', async () => {
     const reload = vi.fn();
     const registration = createMockRegistration({
@@ -75,8 +75,8 @@ describe('forceUpdate', () => {
     const result = await forceUpdate(deps);
 
     expect(result.status).toBe('error');
-    expect(result.message).toBe('Network failure');
-    expect(reload).toHaveBeenCalledOnce();
+    expect(result.message).toBe('You appear to be offline. Please check your connection and try again.');
+    expect(reload).not.toHaveBeenCalled();
   });
 
   // Req 3.3: cache deletion fails → still calls reload, cacheCleared: false

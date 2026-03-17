@@ -42,11 +42,10 @@ export async function forceUpdate(deps: ForceUpdateDeps): Promise<ForceUpdateRes
 
   // Phase 3: Determine result and potentially reload
   if (updateError) {
-    // Update failed — still attempt reload regardless of cache outcome
-    reload();
+    // Don't reload — we're likely offline and reloading would compound the crash
     return {
       status: 'error',
-      message: updateError.message,
+      message: 'You appear to be offline. Please check your connection and try again.',
       cacheCleared,
     };
   }
