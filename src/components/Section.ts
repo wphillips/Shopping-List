@@ -230,6 +230,7 @@ export class Section {
     input.type = 'text';
     input.maxLength = 50;
     input.value = this.config.name;
+    input.placeholder = 'Section name';
     input.setAttribute('aria-label', 'Rename section');
 
     // Stop propagation on click to prevent header collapse toggle
@@ -271,9 +272,13 @@ export class Section {
     const titleSpan = document.createElement('span');
 
     if (trimmedName.length === 0) {
-      // Revert to original name
-      titleSpan.textContent = this.originalName;
-      this.config.name = this.originalName;
+      // Use original name if it exists, otherwise default to "New Section"
+      const fallbackName = this.originalName || 'New Section';
+      titleSpan.textContent = fallbackName;
+      this.config.name = fallbackName;
+      if (!this.originalName) {
+        this.config.onRename(this.config.id, fallbackName);
+      }
     } else {
       titleSpan.textContent = trimmedName;
       this.config.name = trimmedName;
@@ -296,8 +301,12 @@ export class Section {
     if (!input) return;
 
     const titleSpan = document.createElement('span');
-    titleSpan.textContent = this.originalName;
-    this.config.name = this.originalName;
+    const fallbackName = this.originalName || 'New Section';
+    titleSpan.textContent = fallbackName;
+    this.config.name = fallbackName;
+    if (!this.originalName) {
+      this.config.onRename(this.config.id, fallbackName);
+    }
 
     titleContainer.replaceChild(titleSpan, input);
   }

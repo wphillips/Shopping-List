@@ -115,7 +115,7 @@ describe('AppShell Section Management', () => {
     expect(btn.offsetParent !== undefined).toBe(true);
   });
 
-  it('should create section named "New Section" and enter rename mode on click', async () => {
+  it('should create section with empty name and enter rename mode on click', async () => {
     const { stateManager } = await initAppShell();
 
     const btn = document.querySelector('.add-section-btn') as HTMLButtonElement;
@@ -123,15 +123,16 @@ describe('AppShell Section Management', () => {
 
     btn.click();
 
-    // State should now have one section named "New Section"
+    // State should now have one section with empty name (ready for user input)
     const state = stateManager.getState();
     expect(al(state).sections).toHaveLength(1);
-    expect(al(state).sections[0].name).toBe('New Section');
+    expect(al(state).sections[0].name).toBe('');
 
     // The new section should be in rename mode — an input should be present
     const renameInput = document.querySelector('.section-title input[aria-label="Rename section"]') as HTMLInputElement;
     expect(renameInput).toBeTruthy();
-    expect(renameInput.value).toBe('New Section');
+    expect(renameInput.value).toBe('');
+    expect(renameInput.placeholder).toBe('Section name');
   });
 
   it('should activate Add Section button via Enter key', async () => {

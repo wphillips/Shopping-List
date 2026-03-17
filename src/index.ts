@@ -384,7 +384,7 @@ class AppShell {
     // Set a flag so the next render knows a section was just added.
     this.pendingAddSection = true;
     this.sectionCountBeforeAdd = sectionCountBefore;
-    this.stateManager.dispatch({ type: 'ADD_SECTION', name: 'New Section' });
+    this.stateManager.dispatch({ type: 'ADD_SECTION', name: '' });
   }
 
   // Section action handlers
