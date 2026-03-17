@@ -148,6 +148,11 @@ npx tsc --noEmit
 - Keep commits atomic — one logical change per commit when possible
 - Include the spec name or task reference in the commit body when relevant
 
+### Pushing
+
+- After all spec tasks are complete and committed, offer to push to the remote (`git push origin <branch>`)
+- Remind the user that commits are local-only until pushed
+
 ## Code Review Checklist
 
 Before submitting changes:
