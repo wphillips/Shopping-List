@@ -33,7 +33,12 @@ yarn-debug.log*
 yarn-error.log*
 pnpm-debug.log*
 
+# Kiro
+.kiro/settings/
+.kiro/specs/*/.config.kiro
+
 # Terraform
+infra/tfplan
 *.tfstate
 *.tfstate.*
 .terraform/

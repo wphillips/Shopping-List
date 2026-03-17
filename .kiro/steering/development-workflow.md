@@ -138,6 +138,13 @@ npx tsc --noEmit
 - This is the FIRST step — before creating any files or documents
 - Branch from `main` unless the user specifies otherwise
 
+### Spec Files
+
+- Spec files (`.kiro/specs/`) are committed to the repo for documentation purposes
+- Include spec files (`requirements.md`, `design.md`, `tasks.md`) in the feature/fix branch commits
+- `.kiro/specs/*/.config.kiro` files are gitignored (internal config, not documentation)
+- `.kiro/settings/` is gitignored (local settings)
+
 ### Commits
 
 - Offer commits at logical milestones during spec task execution (e.g., after checkpoint tasks or completing a group of related tasks)
