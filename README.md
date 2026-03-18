@@ -148,6 +148,10 @@ The app follows a component-based architecture using vanilla TypeScript (no fram
    - Import a shared list by opening a shared URL
    - Refresh the page to verify data persistence
 
+## Credits
+
+App icon by [Flaticon](https://www.flaticon.com) — free for personal and commercial use with attribution.
+
 ## Requirements
 
 See `.kiro/specs/grocery-list-pwa/requirements.md` for detailed requirements.
