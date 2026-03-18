@@ -271,6 +271,149 @@ function isValidGroceryList(obj: any): obj is GroceryList {
 }
 
 /**
+ * Validate a section with relaxed rules for the load/recovery path.
+ * Tolerates missing createdAt by providing a default.
+ */
+function isValidSectionForLoad(obj: any): boolean {
+  return (
+    typeof obj === 'object' &&
+    obj !== null &&
+    typeof obj.id === 'string' &&
+    typeof obj.name === 'string' &&
+    typeof obj.order === 'number'
+  );
+}
+
+/**
+ * Validate an item with relaxed rules for the load/recovery path.
+ * Tolerates quantity < 1 (will be clamped to 1 during recovery).
+ */
+function isValidItemForLoad(obj: any): boolean {
+  return (
+    typeof obj === 'object' &&
+    obj !== null &&
+    typeof obj.id === 'string' &&
+    typeof obj.name === 'string' &&
+    typeof obj.quantity === 'number' &&
+    typeof obj.isChecked === 'boolean' &&
+    typeof obj.sectionId === 'string' &&
+    typeof obj.createdAt === 'number'
+  );
+}
+
+/**
+ * Attempt to recover a single GroceryList from raw data using relaxed validation.
+ * Clamps item quantities to Math.max(1, quantity) and provides default createdAt for sections.
+ * Returns the recovered list, or null if the list is too corrupted to recover.
+ */
+function tryRecoverList(obj: any): GroceryList | null {
+  if (typeof obj !== 'object' || obj === null) return null;
+  if (typeof obj.id !== 'string') return null;
+  if (typeof obj.name !== 'string') return null;
+  if (typeof obj.createdAt !== 'number') return null;
+  if (!Array.isArray(obj.sections)) return null;
+  if (!Array.isArray(obj.items)) return null;
+
+  // Recover sections: keep valid ones, provide default createdAt if missing
+  const recoveredSections: Section[] = [];
+  for (const section of obj.sections) {
+    if (isValidSection(section)) {
+      recoveredSections.push(section);
+    } else if (isValidSectionForLoad(section)) {
+      recoveredSections.push({
+        ...section,
+        createdAt: typeof section.createdAt === 'number' ? section.createdAt : Date.now(),
+      });
+    }
+    // Skip sections that are too corrupted
+  }
+
+  // Recover items: keep valid ones, clamp quantity to Math.max(1, quantity)
+  const sectionIds = new Set(recoveredSections.map(s => s.id));
+  const recoveredItems: Item[] = [];
+  for (const item of obj.items) {
+    if (isValidItem(item)) {
+      recoveredItems.push(item);
+    } else if (isValidItemForLoad(item)) {
+      recoveredItems.push({
+        ...item,
+        quantity: Math.max(1, item.quantity),
+      });
+    }
+    // Skip items that are too corrupted
+  }
+
+  // Filter out items whose sectionId doesn't reference a recovered section
+  const validItems = recoveredItems.filter(item => sectionIds.has(item.sectionId));
+
+  return {
+    id: obj.id,
+    name: obj.name,
+    sections: recoveredSections,
+    items: validItems,
+    createdAt: obj.createdAt,
+  };
+}
+
+/**
+ * Attempt partial recovery of v2 state when strict validation fails.
+ * Iterates over data.lists, recovers individually valid lists, and
+ * returns a MultiListState with the surviving lists.
+ * Returns null if zero lists survive recovery.
+ */
+function tryRecoverV2State(data: any): MultiListState | null {
+  if (typeof data !== 'object' || data === null) return null;
+  if (!Array.isArray(data.lists)) return null;
+
+  const recoveredLists: GroceryList[] = [];
+  let discardedCount = 0;
+
+  for (const rawList of data.lists) {
+    const recovered = tryRecoverList(rawList);
+    if (recovered) {
+      recoveredLists.push(recovered);
+    } else {
+      discardedCount++;
+    }
+  }
+
+  if (recoveredLists.length === 0) {
+    console.warn(`Partial recovery failed: all ${discardedCount} lists were too corrupted to recover`);
+    return null;
+  }
+
+  // Determine filterMode
+  const filterMode =
+    data.filterMode === 'all' || data.filterMode === 'checked' || data.filterMode === 'unchecked'
+      ? data.filterMode
+      : 'all';
+
+  // Determine collapsedSections
+  const collapsedSections = Array.isArray(data.collapsedSections)
+    ? new Set<string>(data.collapsedSections)
+    : new Set<string>();
+
+  // Fix activeListId: if it doesn't reference a surviving list, use the first one
+  const survivingIds = new Set(recoveredLists.map(l => l.id));
+  const activeListId =
+    typeof data.activeListId === 'string' && survivingIds.has(data.activeListId)
+      ? data.activeListId
+      : recoveredLists[0].id;
+
+  console.warn(
+    `Partial recovery: recovered ${recoveredLists.length} list(s), discarded ${discardedCount} corrupted list(s)`
+  );
+
+  return {
+    lists: recoveredLists,
+    activeListId,
+    filterMode,
+    collapsedSections,
+    version: 2,
+  };
+}
+
+/**
  * Validate the structure of a v2 MultiListState (serialized form with arrays)
  * @throws StateValidationError if validation fails
  */
@@ -448,7 +591,12 @@ export function loadMultiListState(): MultiListState {
           collapsedSections: new Set<string>(data.collapsedSections),
         };
       } catch (e) {
-        console.warn('V2 state validation failed, returning default state:', e);
+        // Strict validation failed — attempt partial recovery of individual lists
+        console.warn('V2 state strict validation failed, attempting partial recovery:', e);
+        const recovered = tryRecoverV2State(data);
+        if (recovered) {
+          return recovered;
+        }
         return createDefaultMultiListState();
       }
     }
