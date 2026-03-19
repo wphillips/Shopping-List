@@ -12,7 +12,7 @@ import { toShortTimestamp } from './build-timestamp';
 import { serialize } from './serializer';
 import { encodeListUrl } from './url-codec';
 import { shareList, ShareDeps } from './share-controller';
-import { checkImportUrl, ImportDeps } from './import-controller';
+import { processImport, ImportDeps } from './import-controller';
 import {
   shouldShowInstallPrompt,
   isIOSSafari,
@@ -224,7 +224,7 @@ class AppShell {
   }
 
   /**
-   * Check URL for shared list on init and handle import flow
+   * Check URL for shared list on init and handle import/merge flow
    */
   private handleImport(): void {
     const deps: ImportDeps = {
@@ -232,24 +232,53 @@ class AppShell {
       replaceState: (url) => history.replaceState(null, '', url),
     };
 
-    const result = checkImportUrl(deps);
+    const state = this.stateManager.getState();
+    const result = processImport(deps, state.lists);
 
-    if (result.status === 'none') return;
+    if (result.action === 'none') return;
 
-    if (result.status === 'error') {
+    if (result.action === 'error') {
       console.error('Import error:', result.message, 'Search:', window.location.search.substring(0, 100));
       this.showNotification('Could not load shared list: invalid link', 'error');
-      // Remove the query parameter
       history.replaceState(null, '', window.location.pathname);
       return;
     }
 
-    // result.status === 'decoded'
+    if (result.action === 'merged') {
+      const confirmed = confirm(`Merge incoming changes into "${state.lists.find(l => l.id === result.listId)?.name ?? 'list'}"?`);
+      history.replaceState(null, '', window.location.pathname);
+      if (confirmed) {
+        this.stateManager.dispatch({ type: 'MERGE_LIST', listId: result.listId, mergedList: result.mergedList });
+        const { stats } = result;
+        if (stats.itemsAdded === 0 && stats.itemsUnchecked === 0 && stats.sectionsAdded === 0) {
+          this.showNotification('Lists are already in sync', 'info');
+        } else {
+          const parts: string[] = [];
+          if (stats.itemsAdded > 0) parts.push(`${stats.itemsAdded} new item${stats.itemsAdded === 1 ? '' : 's'} added`);
+          if (stats.itemsUnchecked > 0) parts.push(`${stats.itemsUnchecked} item${stats.itemsUnchecked === 1 ? '' : 's'} unchecked`);
+          if (stats.sectionsAdded > 0) parts.push(`${stats.sectionsAdded} new section${stats.sectionsAdded === 1 ? '' : 's'} added`);
+          this.showNotification(`Merged: ${parts.join(', ')}`, 'info');
+        }
+        this.showInstallBannerIfEligible();
+      }
+      return;
+    }
+
+    if (result.action === 'choose') {
+      // For now, fall back to import-as-new when multiple matches exist
+      // A future task can add a selection UI
+      const confirmed = confirm(`Import shared list "${result.incomingList.name}" as a new list?`);
+      history.replaceState(null, '', window.location.pathname);
+      if (confirmed) {
+        this.stateManager.dispatch({ type: 'IMPORT_LIST', list: result.incomingList });
+        this.showInstallBannerIfEligible();
+      }
+      return;
+    }
+
+    // result.action === 'import-new'
     const confirmed = confirm(`Import shared list "${result.list.name}"?`);
-
-    // Always remove the query parameter
     history.replaceState(null, '', window.location.pathname);
-
     if (confirmed) {
       this.stateManager.dispatch({ type: 'IMPORT_LIST', list: result.list });
       this.showInstallBannerIfEligible();
