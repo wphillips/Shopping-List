@@ -36,6 +36,7 @@ export interface DismissalDeps {
 export interface InstallPromptBannerConfig {
   deferredPrompt: BeforeInstallPromptEvent | null;
   isIOS: boolean;
+  detectDeps: DetectDeps;
   onDismiss: () => void;
   onInstallAccepted: () => void;
 }
@@ -126,6 +127,73 @@ export function shouldShowInstallPrompt(
 }
 
 // ---------------------------------------------------------------------------
+// Browser identification
+// ---------------------------------------------------------------------------
+
+/** Supported browser families for install instructions. */
+export type BrowserId =
+  | 'chrome-android'
+  | 'firefox-android'
+  | 'samsung-internet'
+  | 'ios-safari'
+  | 'unknown';
+
+/**
+ * Classifies the browser from the user-agent string.
+ *
+ * Priority order matters — Samsung Internet's UA also contains "Chrome",
+ * so it must be checked before the Chrome-Android branch.
+ */
+export function detectBrowser(deps: DetectDeps): BrowserId {
+  const ua = deps.userAgent;
+
+  // 1. iOS Safari (same logic as isIOSSafari)
+  const isIOS = /iPhone|iPad|iPod/i.test(ua);
+  const isWebKit = /AppleWebKit/i.test(ua);
+  const isNotChrome = !/CriOS/i.test(ua);
+  const isNotFirefox = !/FxiOS/i.test(ua);
+  if (isIOS && isWebKit && isNotChrome && isNotFirefox) return 'ios-safari';
+
+  // 2. Samsung Internet (before Chrome — its UA contains "Chrome")
+  if (/SamsungBrowser/i.test(ua)) return 'samsung-internet';
+
+  // 3. Firefox on Android
+  if (/Firefox/i.test(ua) && /Android/i.test(ua)) return 'firefox-android';
+
+  // 4. Chrome on Android
+  if (/Chrome/i.test(ua) && /Android/i.test(ua)) return 'chrome-android';
+
+  // 5. Fallback
+  return 'unknown';
+}
+
+// ---------------------------------------------------------------------------
+// Instruction lookup
+// ---------------------------------------------------------------------------
+
+/** Maps each browser family to a human-readable install instruction. */
+const installInstructions: Record<BrowserId, string> = {
+  'chrome-android':
+    'To install, tap the \u22EE menu and select "Add to Home Screen" or "Install App".',
+  'firefox-android':
+    'To install, tap the \u22EE menu and select "Install".',
+  'samsung-internet':
+    'To install, tap the menu button and select "Add page to" \u2192 "Home screen".',
+  'ios-safari':
+    'To install this app, tap the Share button and select "Add to Home Screen".',
+  unknown:
+    'To install, open your browser menu and look for "Add to Home Screen" or "Install".',
+};
+
+/**
+ * Returns a browser-specific installation instruction string for the given
+ * browser identifier.
+ */
+export function getInstallInstruction(browserId: BrowserId): string {
+  return installInstructions[browserId];
+}
+
+// ---------------------------------------------------------------------------
 // InstallPromptBanner component
 // ---------------------------------------------------------------------------
 
@@ -134,10 +202,9 @@ export function shouldShowInstallPrompt(
  *
  * - When `deferredPrompt` is provided, renders an "Install" button that
  *   triggers the native install dialog.
- * - When `deferredPrompt` is null and `isIOS` is true, renders manual
- *   instructions for iOS Safari.
- * - When `deferredPrompt` is null and `isIOS` is false, renders a generic
- *   "Add to Home Screen" message.
+ * - When `deferredPrompt` is null, detects the browser via `detectBrowser`
+ *   and displays browser-specific install instructions via
+ *   `getInstallInstruction`.
  */
 export class InstallPromptBanner {
   private element: HTMLElement;
@@ -188,13 +255,9 @@ export class InstallPromptBanner {
 
       banner.appendChild(message);
       banner.appendChild(installBtn);
-    } else if (this.config.isIOS) {
-      message.textContent =
-        'To install this app, tap Share then "Add to Home Screen".';
-      banner.appendChild(message);
     } else {
-      message.textContent =
-        'Add this app to your home screen for quick access.';
+      const browserId = detectBrowser(this.config.detectDeps);
+      message.textContent = getInstallInstruction(browserId);
       banner.appendChild(message);
     }
 
