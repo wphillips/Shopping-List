@@ -131,6 +131,7 @@ class AppShell {
         <main id="sections-container" class="sections-container"></main>
         <footer id="app-footer" class="app-footer">
           <span class="build-timestamp">${__BUILD_TIMESTAMP__}</span>
+          <a href="https://github.com/wphillips/Shopping-List" target="_blank" rel="noopener noreferrer" aria-label="View source code on GitHub" class="github-link">GitHub</a>
         </footer>
       </div>
     `;
