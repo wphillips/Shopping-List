@@ -103,44 +103,39 @@ describe('Build Timestamp Display — Footer DOM Structure', () => {
     delete (window as any).__appShell;
   });
 
-  // Req 2.1: footer contains .build-timestamp span adjacent to .update-btn
-  it('renders .build-timestamp span inside the footer alongside .update-btn', async () => {
+  // Req 2.5: footer no longer contains .build-timestamp (moved to About page)
+  it('main footer does not contain .build-timestamp span', async () => {
     await initAppShell();
 
     const footer = document.querySelector('#app-footer');
     expect(footer).toBeTruthy();
 
     const timestampSpan = footer!.querySelector('.build-timestamp');
-    expect(timestampSpan).toBeTruthy();
-    expect(timestampSpan!.tagName).toBe('SPAN');
-
-    const updateBtn = footer!.querySelector('.update-btn');
-    expect(updateBtn).toBeTruthy();
-
-    // Both elements share the same parent (the footer)
-    expect(timestampSpan!.parentElement).toBe(footer);
-    expect(updateBtn!.parentElement).toBe(footer);
+    expect(timestampSpan).toBeNull();
   });
 
-  // Req 2.1: timestamp span displays the build timestamp text
-  it('displays the __BUILD_TIMESTAMP__ value in the span', async () => {
+  // Req 2.6: footer no longer contains .github-link (moved to About page)
+  it('main footer does not contain .github-link anchor', async () => {
     await initAppShell();
 
-    const timestampSpan = document.querySelector('.build-timestamp');
-    expect(timestampSpan).toBeTruthy();
-    expect(timestampSpan!.textContent).toBe('Built Mar 16, 2026 9:45 PM');
+    const footer = document.querySelector('#app-footer');
+    expect(footer).toBeTruthy();
+
+    const githubLink = footer!.querySelector('.github-link');
+    expect(githubLink).toBeNull();
   });
 
-  // Req 2.3: timestamp span is non-interactive (not a button/anchor, no click handler)
-  it('timestamp span is non-interactive (not a button or anchor)', async () => {
+  // Footer contains .about-link after the update button
+  it('footer contains .about-link element', async () => {
     await initAppShell();
 
-    const timestampSpan = document.querySelector('.build-timestamp') as HTMLElement;
-    expect(timestampSpan).toBeTruthy();
-    expect(timestampSpan.tagName).not.toBe('BUTTON');
-    expect(timestampSpan.tagName).not.toBe('A');
-    // Span elements don't have an onclick by default; verify it's null
-    expect(timestampSpan.onclick).toBeNull();
+    const footer = document.querySelector('#app-footer');
+    expect(footer).toBeTruthy();
+
+    const aboutLink = footer!.querySelector('.about-link');
+    expect(aboutLink).toBeTruthy();
+    expect(aboutLink!.textContent).toBe('About');
+    expect(aboutLink!.getAttribute('aria-label')).toBe('About this app');
   });
 });
 

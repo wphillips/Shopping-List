@@ -43,6 +43,7 @@ class AppShell {
   private swRegistration: ServiceWorkerRegistration | null = null;
   private updateButton: HTMLButtonElement;
   private deferredPrompt: BeforeInstallPromptEvent | null = null;
+  private currentView: 'main' | 'about' = 'main';
 
   constructor(appContainer: HTMLElement) {
     this.appContainer = appContainer;
@@ -64,6 +65,18 @@ class AppShell {
     const footer = this.appContainer.querySelector('#app-footer');
     if (footer) {
       footer.appendChild(this.updateButton);
+
+      // Add About link after the update button
+      const aboutLink = document.createElement('a');
+      aboutLink.href = '#';
+      aboutLink.className = 'about-link';
+      aboutLink.setAttribute('aria-label', 'About this app');
+      aboutLink.textContent = 'About';
+      aboutLink.addEventListener('click', (e) => {
+        e.preventDefault();
+        this.showAboutPage();
+      });
+      footer.appendChild(aboutLink);
     }
     
     // Initialize InputField component (search-only, no add behavior)
@@ -129,10 +142,7 @@ class AppShell {
         <div id="input-container"></div>
         <div id="filter-container"></div>
         <main id="sections-container" class="sections-container"></main>
-        <footer id="app-footer" class="app-footer">
-          <span class="build-timestamp">${__BUILD_TIMESTAMP__}</span>
-          <a href="https://github.com/wphillips/Shopping-List" target="_blank" rel="noopener noreferrer" aria-label="View source code on GitHub" class="github-link">GitHub</a>
-        </footer>
+        <footer id="app-footer" class="app-footer"></footer>
       </div>
     `;
   }
@@ -266,6 +276,7 @@ class AppShell {
     const banner = new InstallPromptBanner({
       deferredPrompt: this.deferredPrompt,
       isIOS: isIOSSafari(detectDeps),
+      detectDeps,
       onDismiss: () => {
         setDismissed(dismissalDeps);
         banner.remove();
@@ -307,6 +318,11 @@ class AppShell {
    * Render all sections and items based on current state
    */
   private render(): void {
+    if (this.currentView === 'about') {
+      this.renderAboutPage();
+      return;
+    }
+
     const state = this.stateManager.getState();
     const activeList = state.lists.find(l => l.id === state.activeListId);
     const sections = activeList ? activeList.sections : [];
@@ -622,6 +638,67 @@ class AppShell {
     setTimeout(() => {
       toast.remove();
     }, 4000);
+  }
+
+  /**
+   * Switch to the About page view
+   */
+  private showAboutPage(): void {
+    this.currentView = 'about';
+    this.toggleShellChrome('none');
+    this.render();
+  }
+
+  /**
+   * Switch back to the main grocery list view
+   */
+  private showMainView(): void {
+    this.currentView = 'main';
+    this.toggleShellChrome('');
+    this.render();
+  }
+
+  /**
+   * Show or hide the header, input, filter, and footer chrome elements.
+   */
+  private toggleShellChrome(display: string): void {
+    const selectors = ['.app-header', '#input-container', '#filter-container', '#app-footer'];
+    for (const sel of selectors) {
+      const el = this.appContainer.querySelector(sel) as HTMLElement | null;
+      if (el) el.style.display = display;
+    }
+  }
+
+  /**
+   * Render the About page content into the sections container
+   */
+  private renderAboutPage(): void {
+    const sectionsContainer = document.getElementById('sections-container');
+    if (!sectionsContainer) return;
+
+    sectionsContainer.innerHTML = `
+      <div class="about-page">
+        <button class="about-back-btn" aria-label="Back to grocery list">← Back</button>
+        <h1>About Grocery List</h1>
+        <p>A shopping list app that works offline and keeps your groceries organized.</p>
+        <h2>Features</h2>
+        <ul>
+          <li><strong>Movable Sections</strong> — Reorder your grocery sections to match your store layout.</li>
+          <li><strong>Sharing</strong> — Share your list with others via a link.</li>
+          <li><strong>Offline Support</strong> — Works without an internet connection as a PWA.</li>
+          <li><strong>Multiple Lists</strong> — Manage more than one list.</li>
+        </ul>
+        <footer class="about-footer">
+          <span class="build-timestamp">${__BUILD_TIMESTAMP__}</span>
+          <a href="https://github.com/wphillips/Shopping-List" target="_blank" rel="noopener noreferrer" aria-label="View source code on GitHub" class="github-link">GitHub</a>
+        </footer>
+      </div>
+    `;
+
+    const backBtn = sectionsContainer.querySelector('.about-back-btn');
+    if (backBtn) {
+      backBtn.addEventListener('click', () => this.showMainView());
+    }
   }
 }
 
