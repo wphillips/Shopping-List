@@ -35,7 +35,8 @@ export type Action =
   | { type: 'DELETE_LIST'; listId: string }
   | { type: 'RENAME_LIST'; listId: string; name: string }
   | { type: 'SWITCH_LIST'; listId: string }
-  | { type: 'IMPORT_LIST'; list: GroceryList };
+  | { type: 'IMPORT_LIST'; list: GroceryList }
+  | { type: 'MERGE_LIST'; listId: string; mergedList: GroceryList };
 
 /**
  * Listener function type for state changes
@@ -121,6 +122,10 @@ export function reducer(state: MultiListState, action: Action): MultiListState {
 
     case 'IMPORT_LIST':
       newState = handleImportList(state, action.list);
+      break;
+
+    case 'MERGE_LIST':
+      newState = handleMergeList(state, action.listId, action.mergedList);
       break;
 
     // --- Actions scoped to the active list ---
@@ -310,6 +315,23 @@ function handleImportList(state: MultiListState, list: GroceryList): MultiListSt
     ...state,
     lists: [...state.lists, list],
     activeListId: list.id,
+  };
+}
+
+function handleMergeList(state: MultiListState, listId: string, mergedList: GroceryList): MultiListState {
+  const originalList = state.lists.find(l => l.id === listId);
+  if (!originalList) return state;
+
+  const preservedList: GroceryList = {
+    ...mergedList,
+    id: originalList.id,
+    createdAt: originalList.createdAt,
+  };
+
+  return {
+    ...state,
+    lists: state.lists.map(l => l.id === listId ? preservedList : l),
+    activeListId: listId,
   };
 }
 
