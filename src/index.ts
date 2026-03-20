@@ -27,6 +27,7 @@ import {
 import { shouldShowRedirectBanner, BrowserContextDeps } from './browser-context-detector';
 import { PwaRedirectBanner } from './components/PwaRedirectBanner';
 import { LinkImportUI } from './components/LinkImportUI';
+import { copyToClipboard, ClipboardDeps } from './clipboard-helper';
 
 /**
  * AppShell class - Main application component
@@ -198,6 +199,18 @@ class AppShell {
         importBtn.addEventListener('click', () => this.toggleLinkImportUI());
         linkImportContainer.appendChild(importBtn);
       }
+    } else if (this.shouldShowCopyButton(standaloneDeps)) {
+      // Browser redirect scenario: show a copy-link button in the same
+      // header position where the PWA shows the import button.
+      const linkImportContainer = document.getElementById('link-import-container');
+      if (linkImportContainer) {
+        const copyBtn = document.createElement('button');
+        copyBtn.className = 'copy-link-header-btn icon-only';
+        copyBtn.innerHTML = '🔗';
+        copyBtn.setAttribute('aria-label', 'Copy share link');
+        copyBtn.addEventListener('click', () => this.handleHeaderCopyClick(copyBtn));
+        linkImportContainer.appendChild(copyBtn);
+      }
     }
   }
 
@@ -361,6 +374,54 @@ class AppShell {
     if (this.linkImportUI) {
       this.linkImportUI.remove();
       this.linkImportUI = null;
+    }
+  }
+
+  /**
+   * Whether a header copy-link button should be shown.
+   * True when the page was opened in a browser (not standalone) on iOS
+   * with a `?list=` share URL.
+   */
+  private shouldShowCopyButton(standaloneDeps: DetectDeps): boolean {
+    const browserDeps: BrowserContextDeps = {
+      userAgent: standaloneDeps.userAgent,
+      matchMedia: standaloneDeps.matchMedia,
+      standalone: standaloneDeps.standalone,
+      locationSearch: window.location.search,
+      maxTouchPoints: standaloneDeps.maxTouchPoints,
+    };
+    return shouldShowRedirectBanner(browserDeps);
+  }
+
+  /**
+   * Handle the header copy-link button click: copy the current page URL
+   * to the clipboard and update the button text as feedback.
+   */
+  private async handleHeaderCopyClick(button: HTMLButtonElement): Promise<void> {
+    const deps: ClipboardDeps = {
+      clipboardWriteText: navigator.clipboard?.writeText
+        ? (text: string) => navigator.clipboard.writeText(text)
+        : undefined,
+      document: {
+        createElement: (tag: string) => document.createElement(tag),
+        body: {
+          appendChild: (el: HTMLElement) => document.body.appendChild(el),
+          removeChild: (el: HTMLElement) => document.body.removeChild(el),
+        },
+        execCommand: (cmd: string) => document.execCommand(cmd),
+      },
+    };
+
+    const result = await copyToClipboard(window.location.href, deps);
+
+    if (result.status === 'copied') {
+      button.innerHTML = '✅';
+      this.showNotification('Link copied to clipboard', 'info');
+      setTimeout(() => { button.innerHTML = '🔗'; }, 2000);
+    } else {
+      button.innerHTML = '❌';
+      this.showNotification('Failed to copy link', 'error');
+      setTimeout(() => { button.innerHTML = '🔗'; }, 2000);
     }
   }
 
