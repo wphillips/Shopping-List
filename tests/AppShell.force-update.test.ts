@@ -77,6 +77,9 @@ async function initAppShell(): Promise<{ appShell: any }> {
     writable: true,
   });
 
+  // Mock window.matchMedia for standalone detection
+  window.matchMedia = vi.fn().mockReturnValue({ matches: false }) as any;
+
   const app = document.createElement('div');
   app.id = 'app';
   document.body.appendChild(app);
@@ -201,6 +204,8 @@ describe('AppShell Force Update Integration', () => {
     app.id = 'app';
     document.body.appendChild(app);
 
+    window.matchMedia = vi.fn().mockReturnValue({ matches: false }) as any;
+
     await import('../src/index');
 
     // Wait for the async registerServiceWorker().then(reg => setSwRegistration(reg)) to settle
@@ -268,6 +273,8 @@ describe('AppShell Force Update Integration', () => {
     const app = document.createElement('div');
     app.id = 'app';
     document.body.appendChild(app);
+
+    window.matchMedia = vi.fn().mockReturnValue({ matches: false }) as any;
 
     await import('../src/index');
 

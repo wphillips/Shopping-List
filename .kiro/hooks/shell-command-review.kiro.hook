@@ -1,0 +1,14 @@
+{
+  "enabled": true,
+  "name": "Shell Command Safety Review",
+  "version": "1.0.0",
+  "description": "Analyzes shell commands before execution for safety classification",
+  "when": {
+    "type": "preToolUse",
+    "toolTypes": ["shell"]
+  },
+  "then": {
+    "type": "askAgent",
+    "prompt": "Before this shell command runs, classify it.\n\nIf it is a safe, read-only, or common development command (e.g. tsc, eslint, prettier, jest, vitest, mocha, npm test, npm run build, npx, node, cat, ls, dir, git status, git diff, git log, git branch, echo, pwd, which, where), just say: 'Safe to trust — read-only command.' and proceed.\n\nIf the command is potentially destructive — things like rm, del, rmdir, drop, truncate, format, mkfs, chmod, chown, curl|bash, wget|bash, npm publish, git push --force, git reset --hard, or database mutations — provide a one-sentence explanation of what it does and add a ⚠️ WARNING explaining what it will change and the risks involved.\n\nDo NOT block any command."
+  }
+}

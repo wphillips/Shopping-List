@@ -2,7 +2,7 @@
   "enabled": true,
   "name": "Prompt Commit Push PR",
   "description": "After a spec task completes, check if all tasks in the spec are now done. If so, prompt the user to commit, push, and create a PR to merge the feature/fix branch into main.",
-  "version": "1",
+  "version": "1.0.0",
   "when": {
     "type": "postTaskExecution"
   },

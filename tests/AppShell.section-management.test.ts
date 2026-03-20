@@ -75,6 +75,9 @@ async function initAppShell(): Promise<{ appShell: any; stateManager: StateManag
   app.id = 'app';
   document.body.appendChild(app);
 
+  // Mock window.matchMedia for standalone detection
+  window.matchMedia = vi.fn().mockReturnValue({ matches: false }) as any;
+
   // Dynamic import — each call gets a fresh module because we reset modules
   await import('../src/index');
 
