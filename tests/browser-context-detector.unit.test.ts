@@ -82,6 +82,24 @@ describe('isIOSDevice', () => {
     });
     expect(isIOSDevice(deps)).toBe(false);
   });
+
+  it('returns true for iPadOS 13+ (desktop UA with touch)', () => {
+    const deps = makeDeps({
+      userAgent:
+        'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Safari/605.1.15',
+      maxTouchPoints: 5,
+    });
+    expect(isIOSDevice(deps)).toBe(true);
+  });
+
+  it('returns false for real macOS Safari (no touch)', () => {
+    const deps = makeDeps({
+      userAgent:
+        'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Safari/605.1.15',
+      maxTouchPoints: 0,
+    });
+    expect(isIOSDevice(deps)).toBe(false);
+  });
 });
 
 // ---------------------------------------------------------------------------
