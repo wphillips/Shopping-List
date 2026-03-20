@@ -9,19 +9,24 @@ import { Item } from './components/Item';
 import { MultiListState } from './types';
 import { forceUpdate } from './forceUpdate';
 import { toShortTimestamp } from './build-timestamp';
-import { serialize } from './serializer';
-import { encodeListUrl } from './url-codec';
+import { serialize, deserialize } from './serializer';
+import { encodeListUrl, decodeListFragment } from './url-codec';
 import { shareList, ShareDeps } from './share-controller';
-import { processImport, ImportDeps } from './import-controller';
+import { processImport, resolveImportAction, ImportDeps } from './import-controller';
+import { mergeLists } from './merge-engine';
 import {
   shouldShowInstallPrompt,
   isIOSSafari,
+  isStandaloneMode,
   setDismissed,
   InstallPromptBanner,
   BeforeInstallPromptEvent,
   DetectDeps,
   DismissalDeps,
 } from './install-prompt';
+import { shouldShowRedirectBanner, BrowserContextDeps } from './browser-context-detector';
+import { PwaRedirectBanner } from './components/PwaRedirectBanner';
+import { LinkImportUI } from './components/LinkImportUI';
 
 /**
  * AppShell class - Main application component
@@ -44,6 +49,7 @@ class AppShell {
   private updateButton: HTMLButtonElement;
   private deferredPrompt: BeforeInstallPromptEvent | null = null;
   private currentView: 'main' | 'about' = 'main';
+  private linkImportUI: LinkImportUI | null = null;
 
   constructor(appContainer: HTMLElement) {
     this.appContainer = appContainer;
@@ -137,7 +143,10 @@ class AppShell {
       <div class="app-shell">
         <div class="app-header">
           <div id="list-selector-container"></div>
-          <div id="share-container"></div>
+          <div id="header-actions" class="header-actions">
+            <div id="link-import-container"></div>
+            <div id="share-container"></div>
+          </div>
         </div>
         <div id="input-container"></div>
         <div id="filter-container"></div>
@@ -169,6 +178,26 @@ class AppShell {
     const shareContainer = document.getElementById('share-container');
     if (shareContainer) {
       shareContainer.appendChild(this.shareButton);
+    }
+
+    // In standalone mode, show the "Import from Link" button
+    const standaloneDeps: DetectDeps = {
+      userAgent: navigator.userAgent,
+      maxTouchPoints: navigator.maxTouchPoints,
+      matchMedia: (q) => window.matchMedia(q),
+      standalone: (navigator as any).standalone,
+    };
+
+    if (isStandaloneMode(standaloneDeps)) {
+      const linkImportContainer = document.getElementById('link-import-container');
+      if (linkImportContainer) {
+        const importBtn = document.createElement('button');
+        importBtn.className = 'import-from-link-btn icon-only';
+        importBtn.innerHTML = '📋';
+        importBtn.setAttribute('aria-label', 'Import from Link');
+        importBtn.addEventListener('click', () => this.toggleLinkImportUI());
+        linkImportContainer.appendChild(importBtn);
+      }
     }
   }
 
@@ -224,9 +253,152 @@ class AppShell {
   }
 
   /**
-   * Check URL for shared list on init and handle import/merge flow
+   * Toggle the LinkImportUI panel: if it exists, remove it; if not, create
+   * it and insert it before the input container.
+   */
+  private toggleLinkImportUI(): void {
+    if (this.linkImportUI) {
+      this.linkImportUI.remove();
+      this.linkImportUI = null;
+      return;
+    }
+
+    this.linkImportUI = new LinkImportUI({
+      onImport: (url: string) => this.handleLinkImport(url),
+      onCancel: () => {
+        if (this.linkImportUI) {
+          this.linkImportUI.remove();
+          this.linkImportUI = null;
+        }
+      },
+    });
+
+    const inputContainer = document.getElementById('input-container');
+    const appShell = this.appContainer.querySelector('.app-shell');
+    if (appShell && inputContainer) {
+      appShell.insertBefore(this.linkImportUI.getElement(), inputContainer);
+    }
+  }
+
+  /**
+   * Handle a pasted URL from the LinkImportUI.
+   * Parses the URL, decodes the list fragment, deserializes, and dispatches
+   * the appropriate import or merge action.
+   */
+  private handleLinkImport(url: string): void {
+    // 1. Extract search or hash from the pasted URL
+    let searchOrHash = '';
+    try {
+      const parsed = new URL(url);
+      searchOrHash = parsed.search || parsed.hash;
+    } catch {
+      // URL parsing failed — treat the raw string as search/hash
+      searchOrHash = url;
+    }
+
+    // 2. Decode the list fragment
+    const decoded = decodeListFragment(searchOrHash);
+
+    if (decoded === null || (typeof decoded === 'object' && 'error' in decoded)) {
+      this.linkImportUI?.showError('Not a valid share link');
+      return;
+    }
+
+    // 3. Deserialize the decoded JSON string
+    const result = deserialize(decoded);
+
+    if ('error' in result) {
+      this.linkImportUI?.showError('Not a valid share link');
+      return;
+    }
+
+    // 4. Resolve import action against existing lists
+    const state = this.stateManager.getState();
+    const importAction = resolveImportAction(result, state.lists);
+
+    switch (importAction.action) {
+      case 'import-new': {
+        this.stateManager.dispatch({ type: 'IMPORT_LIST', list: importAction.list });
+        this.showNotification(`Imported list "${importAction.list.name}"`, 'info');
+        break;
+      }
+      case 'merge': {
+        const { mergedList, stats } = mergeLists(importAction.localList, importAction.incomingList);
+        this.stateManager.dispatch({ type: 'MERGE_LIST', listId: importAction.localList.id, mergedList });
+        if (stats.itemsAdded === 0 && stats.itemsUnchecked === 0 && stats.sectionsAdded === 0) {
+          this.showNotification('Lists are already in sync', 'info');
+        } else {
+          const parts: string[] = [];
+          if (stats.itemsAdded > 0) parts.push(`${stats.itemsAdded} new item${stats.itemsAdded === 1 ? '' : 's'} added`);
+          if (stats.itemsUnchecked > 0) parts.push(`${stats.itemsUnchecked} item${stats.itemsUnchecked === 1 ? '' : 's'} unchecked`);
+          if (stats.sectionsAdded > 0) parts.push(`${stats.sectionsAdded} new section${stats.sectionsAdded === 1 ? '' : 's'} added`);
+          this.showNotification(`Merged: ${parts.join(', ')}`, 'info');
+        }
+        break;
+      }
+      case 'choose': {
+        // For now, import as new (same as existing handleImport behavior)
+        this.stateManager.dispatch({ type: 'IMPORT_LIST', list: importAction.incomingList });
+        this.showNotification(`Imported list "${importAction.incomingList.name}"`, 'info');
+        break;
+      }
+      default:
+        return;
+    }
+
+    // 5. Remove LinkImportUI on success
+    if (this.linkImportUI) {
+      this.linkImportUI.remove();
+      this.linkImportUI = null;
+    }
+  }
+
+  /**
+   * Check URL for shared list on init and handle import/merge flow.
+   * On iOS browser contexts with a `?list=` URL, shows a PWA redirect banner
+   * instead of proceeding with the normal import flow.
    */
   private handleImport(): void {
+    // Check if the redirect banner should be shown (iOS + browser + ?list= URL)
+    const browserDeps: BrowserContextDeps = {
+      userAgent: navigator.userAgent,
+      matchMedia: (q) => window.matchMedia(q),
+      standalone: (navigator as any).standalone,
+      locationSearch: window.location.search,
+    };
+
+    if (shouldShowRedirectBanner(browserDeps)) {
+      const banner = new PwaRedirectBanner({
+        pageUrl: window.location.href,
+        onDismiss: () => {
+          banner.remove();
+          this.runProcessImport();
+        },
+        onCopyResult: (result) => {
+          if (result.status === 'copied') {
+            this.showNotification('Link copied to clipboard', 'info');
+          } else {
+            this.showNotification('Failed to copy link', 'error');
+          }
+        },
+      });
+
+      const appShell = this.appContainer.querySelector('.app-shell');
+      if (appShell) {
+        appShell.appendChild(banner.getElement());
+      }
+      return;
+    }
+
+    // Non-iOS or standalone context — proceed with normal import flow
+    this.runProcessImport();
+  }
+
+  /**
+   * Run the existing processImport flow (extracted so it can be called
+   * both directly and after the redirect banner is dismissed).
+   */
+  private runProcessImport(): void {
     const deps: ImportDeps = {
       getHash: () => window.location.search || window.location.hash,
       replaceState: (url) => history.replaceState(null, '', url),

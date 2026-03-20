@@ -2,12 +2,12 @@
   "enabled": true,
   "name": "Ensure Feature Branch",
   "description": "Before executing any spec task, verify that the current git branch is a feature or fix branch (not main). If on main, create the appropriate branch first using the spec name.",
-  "version": "1",
+  "version": "1.0.0",
   "when": {
     "type": "preTaskExecution"
   },
   "then": {
     "type": "askAgent",
-    "prompt": "Before starting this task, check the current git branch with `git branch --show-current`. If you are on `main`, you MUST create a feature/fix branch first before making any changes. Use `feat/{spec-name}` for feature specs or `fix/{spec-name}` for bugfix specs, branching from main. Do NOT proceed with task implementation until you are on the correct branch."
+    "prompt": "Check the current git branch with `git branch --show-current`. If you are already on a feature/ or fix/ branch, say nothing and proceed immediately. If you are on `main`, you MUST create the appropriate branch first before making any changes. Use `feat/{spec-name}` for feature specs or `fix/{spec-name}` for bugfix specs, branching from main. Do NOT proceed with task implementation until you are on the correct branch."
   }
 }

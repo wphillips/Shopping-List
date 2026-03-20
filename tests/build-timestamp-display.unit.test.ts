@@ -84,6 +84,9 @@ async function initAppShell(): Promise<{ appShell: any }> {
   app.id = 'app';
   document.body.appendChild(app);
 
+  // Mock window.matchMedia for standalone detection
+  window.matchMedia = vi.fn().mockReturnValue({ matches: false }) as any;
+
   await import('../src/index');
 
   const appShell = (window as any).__appShell;

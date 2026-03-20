@@ -2,7 +2,7 @@
   "enabled": true,
   "name": "Request Copilot Code Review",
   "description": "After all spec tasks are completed, request a Copilot code review on the open PR for the current branch.",
-  "version": "1",
+  "version": "1.0.0",
   "when": {
     "type": "postTaskExecution"
   },
