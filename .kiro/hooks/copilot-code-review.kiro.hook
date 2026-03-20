@@ -1,0 +1,13 @@
+{
+  "enabled": true,
+  "name": "Request Copilot Code Review",
+  "description": "After all spec tasks are completed, request a Copilot code review on the open PR for the current branch.",
+  "version": "1",
+  "when": {
+    "type": "postTaskExecution"
+  },
+  "then": {
+    "type": "askAgent",
+    "prompt": "Check if ALL tasks in the current spec's tasks.md are now marked complete. If they are, check if there is an open PR for the current branch using `gh pr list --head $(git branch --show-current)`. If a PR exists, request Copilot code review by running `gh pr edit --add-reviewer @copilot`. If no PR exists yet, skip this step."
+  }
+}

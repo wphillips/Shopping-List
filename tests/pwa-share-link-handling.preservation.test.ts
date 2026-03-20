@@ -106,11 +106,11 @@ describe('Preservation: URL Codec and Manifest Fields Unchanged', () => {
         // URL should start with origin and contain ?list=
         expect(url).toContain('?list=');
 
-        // Extract the query string portion (after the ?)
-        const queryString = url.split('?')[1];
+        // Parse the URL and extract the query string via the URL API
+        const parsedUrl = new URL(url);
 
         // Decode should round-trip back to the original JSON
-        const decoded = decodeListFragment('?' + queryString);
+        const decoded = decodeListFragment(parsedUrl.search || '');
 
         expect(decoded).toBe(json);
       }),

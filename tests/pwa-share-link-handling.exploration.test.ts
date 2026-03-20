@@ -21,7 +21,7 @@ const manifestRaw = readFileSync(manifestPath, 'utf-8');
 const manifest: Record<string, unknown> = JSON.parse(manifestRaw);
 
 describe('Bug Condition Exploration: Missing PWA URL Handling Declarations', () => {
-  it('Property 1: Bug Condition — manifest should declare share_target with correct action, method, and params', () => {
+  it('Bug Condition 1 — manifest should declare share_target with correct action, method, and params', () => {
     fc.assert(
       fc.property(fc.constant(manifest), (m) => {
         const shareTarget = m.share_target as
@@ -41,7 +41,7 @@ describe('Bug Condition Exploration: Missing PWA URL Handling Declarations', () 
     );
   });
 
-  it('Property 1: Bug Condition — manifest should declare handle_links as "preferred"', () => {
+  it('Bug Condition 2 — manifest should declare handle_links as "preferred"', () => {
     fc.assert(
       fc.property(fc.constant(manifest), (m) => {
         expect(m.handle_links).toBe('preferred');
@@ -50,7 +50,7 @@ describe('Bug Condition Exploration: Missing PWA URL Handling Declarations', () 
     );
   });
 
-  it('Property 1: Bug Condition — manifest should declare scope as "/"', () => {
+  it('Bug Condition 3 — manifest should declare scope as "/"', () => {
     fc.assert(
       fc.property(fc.constant(manifest), (m) => {
         expect(m.scope).toBe('/');
@@ -59,7 +59,7 @@ describe('Bug Condition Exploration: Missing PWA URL Handling Declarations', () 
     );
   });
 
-  it('Property 1: Bug Condition — share_target.params.url should match the "list" query key used by decodeListFragment', () => {
+  it('Bug Condition 4 — share_target.params.url should match the "list" query key used by decodeListFragment', () => {
     fc.assert(
       fc.property(fc.constant(manifest), (m) => {
         const shareTarget = m.share_target as
