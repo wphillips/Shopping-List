@@ -22,6 +22,7 @@ export interface BrowserContextDeps {
   matchMedia: (query: string) => { matches: boolean };
   standalone?: boolean; // navigator.standalone (iOS)
   locationSearch: string; // window.location.search
+  maxTouchPoints?: number; // navigator.maxTouchPoints (for iPadOS detection)
 }
 
 // ---------------------------------------------------------------------------
@@ -34,14 +35,28 @@ export interface BrowserContextDeps {
  * Matches iPhone, iPad, or iPod combined with AppleWebKit, but excludes
  * Chrome on iOS (CriOS) and Firefox on iOS (FxiOS) since those browsers
  * cannot add PWAs to the home screen.
+ *
+ * Also detects iPadOS 13+ which reports a macOS desktop user-agent
+ * ("Macintosh") — identified by AppleWebKit + touch support.
  */
 export function isIOSDevice(deps: BrowserContextDeps): boolean {
   const ua = deps.userAgent;
-  const hasIOSToken = /iPhone|iPad|iPod/i.test(ua);
-  const hasWebKit = /AppleWebKit/i.test(ua);
   const isNotChromeIOS = !/CriOS/i.test(ua);
   const isNotFirefoxIOS = !/FxiOS/i.test(ua);
-  return hasIOSToken && hasWebKit && isNotChromeIOS && isNotFirefoxIOS;
+
+  if (!isNotChromeIOS || !isNotFirefoxIOS) return false;
+
+  const hasWebKit = /AppleWebKit/i.test(ua);
+  if (!hasWebKit) return false;
+
+  // Classic iOS tokens (iPhone, iPod, older iPads)
+  const hasIOSToken = /iPhone|iPad|iPod/i.test(ua);
+  if (hasIOSToken) return true;
+
+  // iPadOS 13+ reports a macOS UA — detect via Macintosh + touch support
+  const isMacUA = /Macintosh/i.test(ua);
+  const hasTouch = (deps.maxTouchPoints ?? 0) > 0;
+  return isMacUA && hasTouch;
 }
 
 /**

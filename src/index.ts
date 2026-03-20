@@ -288,12 +288,23 @@ class AppShell {
   private handleLinkImport(url: string): void {
     // 1. Extract search or hash from the pasted URL
     let searchOrHash = '';
+    const trimmed = url.trim();
     try {
-      const parsed = new URL(url);
+      // If the pasted text lacks a protocol, prepend one so URL() can parse it
+      const toParse = /^https?:\/\//i.test(trimmed) ? trimmed : `https://${trimmed}`;
+      const parsed = new URL(toParse);
       searchOrHash = parsed.search || parsed.hash;
     } catch {
-      // URL parsing failed — treat the raw string as search/hash
-      searchOrHash = url;
+      // URL parsing failed — try to extract ?list= or #list= manually
+      const qIdx = trimmed.indexOf('?');
+      const hIdx = trimmed.indexOf('#');
+      if (qIdx !== -1) {
+        searchOrHash = trimmed.slice(qIdx);
+      } else if (hIdx !== -1) {
+        searchOrHash = trimmed.slice(hIdx);
+      } else {
+        searchOrHash = trimmed;
+      }
     }
 
     // 2. Decode the list fragment
@@ -365,6 +376,7 @@ class AppShell {
       matchMedia: (q) => window.matchMedia(q),
       standalone: (navigator as any).standalone,
       locationSearch: window.location.search,
+      maxTouchPoints: navigator.maxTouchPoints,
     };
 
     if (shouldShowRedirectBanner(browserDeps)) {
