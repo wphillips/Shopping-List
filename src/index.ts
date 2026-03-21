@@ -27,7 +27,6 @@ import {
 import { shouldShowRedirectBanner, BrowserContextDeps } from './browser-context-detector';
 import { PwaRedirectBanner } from './components/PwaRedirectBanner';
 import { LinkImportUI } from './components/LinkImportUI';
-import { copyToClipboard, ClipboardDeps } from './clipboard-helper';
 
 /**
  * AppShell class - Main application component
@@ -390,25 +389,46 @@ class AppShell {
   /**
    * Handle the header copy-link button click: copy the current page URL
    * to the clipboard and update the button text as feedback.
+   *
+   * Uses navigator.clipboard.writeText directly within the user gesture
+   * for best iOS compatibility. Falls back to a textarea + execCommand
+   * with explicit selection range to avoid truncation on mobile Safari.
    */
   private async handleHeaderCopyClick(button: HTMLButtonElement): Promise<void> {
-    const deps: ClipboardDeps = {
-      clipboardWriteText: navigator.clipboard?.writeText
-        ? (text: string) => navigator.clipboard.writeText(text)
-        : undefined,
-      document: {
-        createElement: (tag: string) => document.createElement(tag),
-        body: {
-          appendChild: (el: HTMLElement) => document.body.appendChild(el),
-          removeChild: (el: HTMLElement) => document.body.removeChild(el),
-        },
-        execCommand: (cmd: string) => document.execCommand(cmd),
-      },
-    };
+    const url = window.location.href;
+    let copied = false;
 
-    const result = await copyToClipboard(window.location.href, deps);
+    // Try Clipboard API first (must be in user gesture context)
+    if (navigator.clipboard?.writeText) {
+      try {
+        await navigator.clipboard.writeText(url);
+        copied = true;
+      } catch {
+        // Clipboard API denied — fall through to textarea fallback
+      }
+    }
 
-    if (result.status === 'copied') {
+    // Textarea fallback with explicit selection range for long strings
+    if (!copied) {
+      try {
+        const textarea = document.createElement('textarea');
+        textarea.value = url;
+        textarea.setAttribute('readonly', '');
+        textarea.style.position = 'fixed';
+        textarea.style.left = '-9999px';
+        textarea.style.top = '-9999px';
+        textarea.style.opacity = '0';
+        document.body.appendChild(textarea);
+        textarea.focus();
+        textarea.setSelectionRange(0, url.length);
+        copied = document.execCommand('copy');
+        document.body.removeChild(textarea);
+      } catch {
+        copied = false;
+      }
+    }
+
+    if (copied) {
       button.innerHTML = '✅';
       this.showNotification('Link copied to clipboard', 'info');
       setTimeout(() => { button.innerHTML = '🔗'; }, 2000);
