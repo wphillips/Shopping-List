@@ -379,18 +379,12 @@ class AppShell {
 
   /**
    * Whether a header copy-link button should be shown.
-   * True when the page was opened in a browser (not standalone) on iOS
-   * with a `?list=` share URL.
+   * True when the URL contains a `?list=` param and the app is running
+   * in a browser tab (not standalone). Works on any device/browser.
    */
-  private shouldShowCopyButton(standaloneDeps: DetectDeps): boolean {
-    const browserDeps: BrowserContextDeps = {
-      userAgent: standaloneDeps.userAgent,
-      matchMedia: standaloneDeps.matchMedia,
-      standalone: standaloneDeps.standalone,
-      locationSearch: window.location.search,
-      maxTouchPoints: standaloneDeps.maxTouchPoints,
-    };
-    return shouldShowRedirectBanner(browserDeps);
+  private shouldShowCopyButton(_standaloneDeps: DetectDeps): boolean {
+    const params = new URLSearchParams(window.location.search);
+    return params.has('list');
   }
 
   /**
