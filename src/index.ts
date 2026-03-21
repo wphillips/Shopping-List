@@ -378,24 +378,27 @@ class AppShell {
 
   /**
    * Whether a header copy-link button should be shown.
-   * True when the URL contains a `?list=` param and the app is running
-   * in a browser tab (not standalone). Works on any device/browser.
+   * True when the app is running in a browser tab (not standalone).
    */
-  private shouldShowCopyButton(_standaloneDeps: DetectDeps): boolean {
-    const params = new URLSearchParams(window.location.search);
-    return params.has('list');
+  private shouldShowCopyButton(standaloneDeps: DetectDeps): boolean {
+    return !isStandaloneMode(standaloneDeps);
   }
 
   /**
-   * Handle the header copy-link button click: copy the current page URL
-   * to the clipboard and update the button text as feedback.
+   * Handle the header copy-link button click: generate a share URL for the
+   * active list and copy it to the clipboard. Updates the button as feedback.
    *
    * Uses navigator.clipboard.writeText directly within the user gesture
    * for best iOS compatibility. Falls back to a textarea + execCommand
    * with explicit selection range to avoid truncation on mobile Safari.
    */
   private async handleHeaderCopyClick(button: HTMLButtonElement): Promise<void> {
-    const url = window.location.href;
+    const state = this.stateManager.getState();
+    const activeList = state.lists.find(l => l.id === state.activeListId);
+    if (!activeList) return;
+
+    const json = serialize(activeList);
+    const url = encodeListUrl(json, window.location.origin);
     let copied = false;
 
     // Try Clipboard API first (must be in user gesture context)
