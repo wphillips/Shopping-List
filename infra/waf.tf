@@ -6,13 +6,17 @@ resource "aws_wafv2_web_acl" "cloudfront" {
   name     = "${var.bucket_prefix}-cloudfront-waf"
   scope    = "CLOUDFRONT"
 
-  default_action { allow {} }
+  default_action {
+    allow {}
+  }
 
   rule {
     name     = "rate-limit"
     priority = 1
 
-    action { block {} }
+    action {
+      block {}
+    }
 
     statement {
       rate_based_statement {
