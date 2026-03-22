@@ -15,9 +15,8 @@ import * as fc from 'fast-check';
 import {
   saveMultiListState,
   loadMultiListState,
-  createDefaultMultiListState,
 } from '../src/storage';
-import { StateManager, reducer } from '../src/state';
+import { reducer } from '../src/state';
 import type { MultiListState, GroceryList, Section, Item, FilterMode } from '../src/types';
 
 const STORAGE_KEY = 'grocery-list-state';

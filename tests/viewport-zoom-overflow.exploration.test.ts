@@ -104,7 +104,7 @@ describe('Bug Condition Exploration: Viewport Zoom Overflow', () => {
     fc.assert(
       fc.property(
         fc.integer({ min: 320, max: 430 }),
-        (viewportWidth: number) => {
+        (_viewportWidth: number) => {
           // 1. Viewport meta tag must constrain zoom
           const content = getViewportContent(indexHtml);
           expect(content).not.toBeNull();

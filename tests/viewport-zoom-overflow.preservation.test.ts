@@ -18,7 +18,6 @@ import * as path from 'path';
 
 // Read source files once for all tests
 const mainCss = fs.readFileSync(path.resolve(__dirname, '../src/styles/main.css'), 'utf-8');
-const indexHtml = fs.readFileSync(path.resolve(__dirname, '../index.html'), 'utf-8');
 
 /**
  * Extract all CSS declaration blocks for a given selector from raw CSS text.
@@ -45,15 +44,6 @@ function hasCssProperty(css: string, selector: string, property: string, value: 
     property.replace(/[-]/g, '\\-') + '\\s*:\\s*' + value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'),
     'i'
   );
-  return blocks.some(block => propRegex.test(block));
-}
-
-/**
- * Check if a CSS property exists (any value) in any block for the given selector.
- */
-function hasCssPropertyAnyValue(css: string, selector: string, property: string): boolean {
-  const blocks = getCssBlocks(css, selector);
-  const propRegex = new RegExp(property.replace(/[-]/g, '\\-') + '\\s*:', 'i');
   return blocks.some(block => propRegex.test(block));
 }
 

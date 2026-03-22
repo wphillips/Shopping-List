@@ -529,7 +529,7 @@ describe('Service Worker', () => {
 
       // Simulate the fixed fetch handler logic for a non-navigation request
       const url = 'https://example.com/api/data.json';
-      const requestMode = 'cors';
+      const requestMode: string = 'cors';
 
       let response = await caches.match(url);
       if (!response) {
