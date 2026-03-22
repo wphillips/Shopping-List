@@ -50,12 +50,14 @@ class AppShell {
   private deferredPrompt: BeforeInstallPromptEvent | null = null;
   private currentView: 'main' | 'about' = 'main';
   private linkImportUI: LinkImportUI | null = null;
+  private lastActiveListId: string = '';
 
   constructor(appContainer: HTMLElement) {
     this.appContainer = appContainer;
     
     // Initialize state manager and load persisted state from localStorage
     this.stateManager = createStateManager();
+    this.lastActiveListId = this.stateManager.getState().activeListId;
     
     // Surface storage quota errors to the user
     this.stateManager.onStorageError = () => {
@@ -588,6 +590,13 @@ class AppShell {
    * Handle state changes and trigger re-render
    */
   private handleStateChange(state: MultiListState): void {
+    // Clear search when switching lists
+    if (state.activeListId !== this.lastActiveListId) {
+      this.lastActiveListId = state.activeListId;
+      this.currentFilterText = '';
+      this.inputField.clear();
+    }
+
     // Update FilterControl to reflect current filter mode
     this.filterControl.updateActiveFilter(state.filterMode);
 
