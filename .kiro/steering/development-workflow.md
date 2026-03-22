@@ -169,7 +169,15 @@ After all spec tasks are complete, tests pass, and the branch is pushed:
 2. If approved:
    - Checkout `main`, merge the feature/fix branch with `--no-ff`, and push `main` to origin
    - Build for production: `npx vite build`
-   - Deploy to S3: `aws s3 sync dist/ s3://shopping-app-pwa-8f1e306a --delete --region us-west-2`
+   - Deploy to S3 with Cache-Control headers (CloudFront free plan uses CachingOptimized which respects origin headers):
+     ```bash
+     aws s3 sync dist/assets/ s3://shopping-app-pwa-8f1e306a/assets/ --cache-control "public, max-age=31536000, immutable" --region us-west-2
+     aws s3 cp dist/index.html s3://shopping-app-pwa-8f1e306a/index.html --cache-control "no-cache, no-store, must-revalidate" --region us-west-2
+     aws s3 cp dist/sw.js s3://shopping-app-pwa-8f1e306a/sw.js --cache-control "no-cache, no-store, must-revalidate" --region us-west-2
+     aws s3 cp dist/manifest.webmanifest s3://shopping-app-pwa-8f1e306a/manifest.webmanifest --cache-control "public, max-age=3600" --region us-west-2
+     aws s3 sync dist/icons/ s3://shopping-app-pwa-8f1e306a/icons/ --cache-control "public, max-age=604800" --region us-west-2
+     aws s3 sync dist/ s3://shopping-app-pwa-8f1e306a/ --cache-control "public, max-age=86400" --exclude "assets/*" --exclude "index.html" --exclude "sw.js" --exclude "manifest.webmanifest" --exclude "icons/*" --region us-west-2
+     ```
    - Invalidate CloudFront: `aws cloudfront create-invalidation --distribution-id E1GNSB6NAC6Z1Q --paths "/*" --region us-west-2`
 3. Confirm deployment succeeded and the site is live
 
@@ -239,12 +247,13 @@ npm run preview
 
 ### Hosting Target
 
-This app is hosted as a static site on S3 with CloudFront in front for HTTPS (required by service workers). The `dist/` folder produced by `npm run build` is deployed directly to the S3 bucket.
+This app is hosted as a static site on S3 with CloudFront in front for HTTPS (required by service workers). CloudFront is on the free plan with managed cache policies (CachingOptimized/CachingDisabled), managed SecurityHeadersPolicy, and a WAF Web ACL with rate limiting. The `dist/` folder produced by `npm run build` is deployed to S3 with per-file-type Cache-Control headers.
 
 Key constraints this imposes:
 - No server-side logic — all state lives in localStorage on the client
 - CloudFront must be configured to serve `index.html` for all routes (SPA fallback)
-- Proper MIME types for `.webmanifest` and `.js` files must be set on the S3 objects or via CloudFront response headers
+- Proper MIME types for `.webmanifest` and `.js` files must be set on the S3 objects
+- Cache-Control headers are set per file type during deploy (see Merge and Deploy section)
 - Cache invalidation on CloudFront after each deploy to ensure users get the latest version
 
 ### Post-Deployment Verification
