@@ -45,7 +45,7 @@ describe('Property 1: Debounce coalesces keystrokes into a single delayed callba
             onSubmit: onSubmitMock as (text: string) => void,
           });
 
-          const el = inputField.getElement();
+          const el = inputField.getInputElement();
 
           // Simulate typing one character at a time, accumulating the string
           let accumulated = '';
@@ -119,7 +119,7 @@ describe('Property 2: Submit immediately fires and cancels pending debounce', ()
             onSubmit: onSubmitMock as (text: string) => void,
           });
 
-          const el = inputField.getElement();
+          const el = inputField.getInputElement();
 
           // Type the string into InputField to start a debounce timer
           el.value = text;
@@ -193,7 +193,7 @@ describe('Property 3: Empty input bypasses debounce', () => {
             onSubmit: onSubmitMock as (text: string) => void,
           });
 
-          const el = inputField.getElement();
+          const el = inputField.getInputElement();
 
           // Type the string into InputField to start a debounce timer
           el.value = text;
@@ -263,7 +263,7 @@ describe('Property 4: Destroy prevents stale callbacks', () => {
             onSubmit: onSubmitMock as (text: string) => void,
           });
 
-          const el = inputField.getElement();
+          const el = inputField.getInputElement();
 
           // Type the string into InputField to start a debounce timer
           el.value = text;

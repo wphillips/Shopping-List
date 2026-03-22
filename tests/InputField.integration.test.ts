@@ -57,7 +57,7 @@ describe('InputField Integration with StateManager', () => {
 
   describe('Text-based Filtering (Requirement 4.2)', () => {
     it('should filter items when user types in input field', () => {
-      const element = inputField.getElement();
+      const element = inputField.getInputElement();
 
       // Type "app" to filter
       element.value = 'app';
@@ -71,7 +71,7 @@ describe('InputField Integration with StateManager', () => {
     });
 
     it('should show all items when input is empty', () => {
-      const element = inputField.getElement();
+      const element = inputField.getInputElement();
 
       element.value = '';
       element.dispatchEvent(new Event('input'));
@@ -80,7 +80,7 @@ describe('InputField Integration with StateManager', () => {
     });
 
     it('should perform case-insensitive filtering (Requirement 4.3)', () => {
-      const element = inputField.getElement();
+      const element = inputField.getInputElement();
 
       // Type "BANANA" in uppercase
       element.value = 'BANANA';
@@ -94,7 +94,7 @@ describe('InputField Integration with StateManager', () => {
     });
 
     it('should show no items when filter matches nothing', () => {
-      const element = inputField.getElement();
+      const element = inputField.getInputElement();
 
       element.value = 'xyz';
       element.dispatchEvent(new Event('input'));
@@ -108,7 +108,7 @@ describe('InputField Integration with StateManager', () => {
 
   describe('Item Addition (Requirement 4.5)', () => {
     it('should add new item to selected section on submit', () => {
-      const element = inputField.getElement();
+      const element = inputField.getInputElement();
       const initialItemCount = al(stateManager.getState()).items.length;
 
       element.value = 'Oranges';
@@ -125,7 +125,7 @@ describe('InputField Integration with StateManager', () => {
     });
 
     it('should clear input after adding item', () => {
-      const element = inputField.getElement();
+      const element = inputField.getInputElement();
 
       element.value = 'Grapes';
       const enterEvent = new KeyboardEvent('keydown', { key: 'Enter' });
@@ -135,7 +135,7 @@ describe('InputField Integration with StateManager', () => {
     });
 
     it('should allow duplicate item names (Requirement 4.6)', () => {
-      const element = inputField.getElement();
+      const element = inputField.getInputElement();
 
       // Add "Apples" again (already exists)
       element.value = 'Apples';
@@ -150,7 +150,7 @@ describe('InputField Integration with StateManager', () => {
     });
 
     it('should not add empty items', () => {
-      const element = inputField.getElement();
+      const element = inputField.getInputElement();
       const initialItemCount = al(stateManager.getState()).items.length;
 
       element.value = '';
@@ -161,7 +161,7 @@ describe('InputField Integration with StateManager', () => {
     });
 
     it('should not add whitespace-only items', () => {
-      const element = inputField.getElement();
+      const element = inputField.getInputElement();
       const initialItemCount = al(stateManager.getState()).items.length;
 
       element.value = '   ';
@@ -174,7 +174,7 @@ describe('InputField Integration with StateManager', () => {
 
   describe('Combined Filtering and Addition', () => {
     it('should clear filter after adding item', () => {
-      const element = inputField.getElement();
+      const element = inputField.getInputElement();
 
       // First, filter items
       element.value = 'app';
