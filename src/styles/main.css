@@ -1368,6 +1368,7 @@ button.danger:hover {
 .header-actions {
   display: flex;
   gap: 0.25rem;
+  margin-left: auto;
 }
 
 /* ================================================================
