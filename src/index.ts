@@ -669,11 +669,15 @@ class AppShell {
         
         const isNewlyAdded = newlyAddedSectionId === section.id;
 
+        // Auto-collapse sections with no matching items during search
+        const isCollapsed = state.collapsedSections.has(section.id)
+          || (this.currentFilterText !== '' && sectionItems.length === 0);
+
         // Create Section component
         const sectionComponent = new Section({
           id: section.id,
           name: section.name,
-          isCollapsed: state.collapsedSections.has(section.id),
+          isCollapsed,
           initialRenameMode: isNewlyAdded,
           onToggle: () => this.handleSectionToggle(section.id),
           onMoveUp: () => this.handleSectionMoveUp(section.id),
@@ -691,7 +695,7 @@ class AppShell {
         sectionsContainer.appendChild(sectionComponent.getElement());
 
         // Render items within the section if not collapsed
-        if (!state.collapsedSections.has(section.id)) {
+        if (!isCollapsed) {
           const contentElement = sectionComponent.getContentElement();
           
           if (sectionItems.length === 0) {
