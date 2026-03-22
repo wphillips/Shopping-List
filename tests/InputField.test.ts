@@ -29,18 +29,23 @@ describe('InputField Component', () => {
 
   describe('Rendering', () => {
     it('should create an input element with correct attributes', () => {
-      const element = inputField.getElement();
+      const element = inputField.getInputElement();
       
       expect(element.tagName).toBe('INPUT');
       expect(element.type).toBe('text');
       expect(element.placeholder).toBe('Add item or search...');
       expect(element.getAttribute('aria-label')).toBe('Add or search items');
     });
+
+    it('should return a DIV wrapper from getElement()', () => {
+      const wrapper = inputField.getElement();
+      expect(wrapper.tagName).toBe('DIV');
+    });
   });
 
   describe('Input Filtering (Requirement 4.2)', () => {
     it('should trigger onInput callback when user types', () => {
-      const element = inputField.getElement();
+      const element = inputField.getInputElement();
       
       // Simulate typing
       element.value = 'apples';
@@ -53,7 +58,7 @@ describe('InputField Component', () => {
     });
 
     it('should trigger onInput callback with empty string when cleared', () => {
-      const element = inputField.getElement();
+      const element = inputField.getInputElement();
       
       // Type something first
       element.value = 'apples';
@@ -69,7 +74,7 @@ describe('InputField Component', () => {
 
   describe('Item Submission (Requirement 4.5)', () => {
     it('should submit valid text when Enter is pressed', () => {
-      const element = inputField.getElement();
+      const element = inputField.getInputElement();
       
       element.value = 'Bananas';
       const enterEvent = new KeyboardEvent('keydown', { key: 'Enter' });
@@ -79,7 +84,7 @@ describe('InputField Component', () => {
     });
 
     it('should trim whitespace before submission', () => {
-      const element = inputField.getElement();
+      const element = inputField.getInputElement();
       
       element.value = '  Milk  ';
       const enterEvent = new KeyboardEvent('keydown', { key: 'Enter' });
@@ -89,7 +94,7 @@ describe('InputField Component', () => {
     });
 
     it('should clear input field after successful submission', () => {
-      const element = inputField.getElement();
+      const element = inputField.getInputElement();
       
       element.value = 'Bread';
       const enterEvent = new KeyboardEvent('keydown', { key: 'Enter' });
@@ -99,7 +104,7 @@ describe('InputField Component', () => {
     });
 
     it('should trigger onInput with empty string after clearing', () => {
-      const element = inputField.getElement();
+      const element = inputField.getInputElement();
       
       element.value = 'Eggs';
       const enterEvent = new KeyboardEvent('keydown', { key: 'Enter' });
@@ -112,7 +117,7 @@ describe('InputField Component', () => {
 
   describe('Input Validation (Requirement 4.1)', () => {
     it('should reject empty input submission', () => {
-      const element = inputField.getElement();
+      const element = inputField.getInputElement();
       
       element.value = '';
       const enterEvent = new KeyboardEvent('keydown', { key: 'Enter' });
@@ -122,7 +127,7 @@ describe('InputField Component', () => {
     });
 
     it('should reject whitespace-only input submission', () => {
-      const element = inputField.getElement();
+      const element = inputField.getInputElement();
       
       element.value = '   ';
       const enterEvent = new KeyboardEvent('keydown', { key: 'Enter' });
@@ -132,7 +137,7 @@ describe('InputField Component', () => {
     });
 
     it('should reject tabs and newlines only', () => {
-      const element = inputField.getElement();
+      const element = inputField.getInputElement();
       
       element.value = '\t\n  \t';
       const enterEvent = new KeyboardEvent('keydown', { key: 'Enter' });
@@ -144,7 +149,7 @@ describe('InputField Component', () => {
 
   describe('Public Methods', () => {
     it('should return current value via getValue()', () => {
-      const element = inputField.getElement();
+      const element = inputField.getInputElement();
       
       element.value = 'Test Value';
       
@@ -152,7 +157,7 @@ describe('InputField Component', () => {
     });
 
     it('should clear input via clear() method', () => {
-      const element = inputField.getElement();
+      const element = inputField.getInputElement();
       
       element.value = 'Something';
       inputField.clear();
@@ -161,7 +166,7 @@ describe('InputField Component', () => {
     });
 
     it('should trigger onInput when clear() is called', () => {
-      const element = inputField.getElement();
+      const element = inputField.getInputElement();
       
       element.value = 'Something';
       onInputMock.mockClear(); // Clear previous calls
@@ -172,20 +177,21 @@ describe('InputField Component', () => {
     });
 
     it('should focus input via focus() method', () => {
-      const element = inputField.getElement();
-      document.body.appendChild(element); // Must be in DOM to focus
+      const wrapper = inputField.getElement();
+      const element = inputField.getInputElement();
+      document.body.appendChild(wrapper); // Must be in DOM to focus
       
       inputField.focus();
       
       expect(document.activeElement).toBe(element);
       
-      document.body.removeChild(element); // Cleanup
+      document.body.removeChild(wrapper); // Cleanup
     });
   });
 
   describe('Edge Cases', () => {
     it('should not submit when other keys are pressed', () => {
-      const element = inputField.getElement();
+      const element = inputField.getInputElement();
       
       element.value = 'Test';
       const tabEvent = new KeyboardEvent('keydown', { key: 'Tab' });
@@ -195,7 +201,7 @@ describe('InputField Component', () => {
     });
 
     it('should handle rapid input changes', () => {
-      const element = inputField.getElement();
+      const element = inputField.getInputElement();
       
       element.value = 'a';
       element.dispatchEvent(new Event('input'));
@@ -214,7 +220,7 @@ describe('InputField Component', () => {
     });
 
     it('should handle special characters in input', () => {
-      const element = inputField.getElement();
+      const element = inputField.getInputElement();
       
       element.value = 'Café & Crème';
       const enterEvent = new KeyboardEvent('keydown', { key: 'Enter' });

@@ -10,6 +10,8 @@ export interface InputFieldConfig {
 }
 
 export class InputField {
+  private wrapper: HTMLDivElement;
+  private clearButton: HTMLButtonElement;
   private element: HTMLInputElement;
   private config: InputFieldConfig;
   private debounceTimer: ReturnType<typeof setTimeout> | null = null;
@@ -18,6 +20,8 @@ export class InputField {
   constructor(config: InputFieldConfig) {
     this.config = config;
     this.element = this.createElement();
+    this.clearButton = this.createClearButton();
+    this.wrapper = this.createWrapper();
     this.attachEventListeners();
   }
 
@@ -34,7 +38,33 @@ export class InputField {
   }
 
   /**
-   * Attach event listeners for input and submit
+   * Create the wrapper div containing input and clear button
+   */
+  private createWrapper(): HTMLDivElement {
+    const wrapper = document.createElement('div');
+    wrapper.className = 'input-field-wrapper';
+    wrapper.style.position = 'relative';
+    wrapper.appendChild(this.element);
+    wrapper.appendChild(this.clearButton);
+    return wrapper;
+  }
+
+  /**
+   * Create the clear button element
+   */
+  private createClearButton(): HTMLButtonElement {
+    const button = document.createElement('button');
+    button.type = 'button';
+    button.textContent = '✕';
+    button.className = 'input-field-clear-btn';
+    button.setAttribute('aria-label', 'Clear search');
+    button.style.display = 'none';
+    button.setAttribute('tabindex', '-1');
+    return button;
+  }
+
+  /**
+   * Attach event listeners for input, submit, and clear
    */
   private attachEventListeners(): void {
     // Handle input for filtering with debounce
@@ -46,6 +76,9 @@ export class InputField {
         clearTimeout(this.debounceTimer);
         this.debounceTimer = null;
       }
+
+      // Update clear button visibility based on current input
+      this.updateClearButtonVisibility();
 
       // Empty input bypasses debounce for immediate feedback
       if (value === '') {
@@ -67,6 +100,41 @@ export class InputField {
         this.handleSubmit();
       }
     });
+
+    // Handle clear button click
+    this.clearButton.addEventListener('click', () => {
+      this.handleClearClick();
+    });
+  }
+
+  /**
+   * Update clear button visibility based on input content
+   */
+  private updateClearButtonVisibility(): void {
+    if (this.element.value !== '') {
+      this.clearButton.style.display = 'flex';
+      this.clearButton.removeAttribute('tabindex');
+    } else {
+      this.clearButton.style.display = 'none';
+      this.clearButton.setAttribute('tabindex', '-1');
+    }
+  }
+
+  /**
+   * Handle clear button click
+   * Cancels debounce, clears input, invokes callback, focuses input
+   */
+  private handleClearClick(): void {
+    // Cancel any pending debounce timer
+    if (this.debounceTimer !== null) {
+      clearTimeout(this.debounceTimer);
+      this.debounceTimer = null;
+    }
+
+    this.element.value = '';
+    this.config.onInput('');
+    this.element.focus();
+    this.updateClearButtonVisibility();
   }
 
   /**
@@ -107,6 +175,8 @@ export class InputField {
     this.element.value = '';
     // Trigger input event to clear any active filtering
     this.config.onInput('');
+    // Update clear button visibility
+    this.updateClearButtonVisibility();
   }
 
   /**
@@ -120,9 +190,16 @@ export class InputField {
   }
 
   /**
-   * Get the DOM element
+   * Get the DOM element (wrapper containing input and clear button)
    */
-  getElement(): HTMLInputElement {
+  getElement(): HTMLDivElement {
+    return this.wrapper;
+  }
+
+  /**
+   * Get the underlying input element
+   */
+  getInputElement(): HTMLInputElement {
     return this.element;
   }
 

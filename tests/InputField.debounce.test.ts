@@ -28,7 +28,7 @@ describe('InputField Debounce Behavior', () => {
   });
 
   it('typing a single character and advancing 300ms fires onInput once', () => {
-    const el = inputField.getElement();
+    const el = inputField.getInputElement();
 
     el.value = 'a';
     el.dispatchEvent(new Event('input'));
@@ -40,7 +40,7 @@ describe('InputField Debounce Behavior', () => {
   });
 
   it('rapid keystrokes within 300ms coalesce into a single onInput call with final value', () => {
-    const el = inputField.getElement();
+    const el = inputField.getInputElement();
 
     el.value = 'a';
     el.dispatchEvent(new Event('input'));
@@ -63,7 +63,7 @@ describe('InputField Debounce Behavior', () => {
   });
 
   it('pressing Enter before 300ms fires onSubmit immediately and cancels pending debounce', () => {
-    const el = inputField.getElement();
+    const el = inputField.getInputElement();
 
     el.value = 'milk';
     el.dispatchEvent(new Event('input'));
@@ -87,7 +87,7 @@ describe('InputField Debounce Behavior', () => {
   });
 
   it('pressing Enter clears input and fires onInput("") immediately', () => {
-    const el = inputField.getElement();
+    const el = inputField.getInputElement();
 
     el.value = 'eggs';
     el.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter' }));
@@ -97,7 +97,7 @@ describe('InputField Debounce Behavior', () => {
   });
 
   it('clearing input to empty fires onInput("") immediately and cancels pending debounce', () => {
-    const el = inputField.getElement();
+    const el = inputField.getInputElement();
 
     // Type something to start a debounce timer
     el.value = 'bread';
@@ -119,7 +119,7 @@ describe('InputField Debounce Behavior', () => {
   });
 
   it('destroy() cancels pending timer so onInput is never called', () => {
-    const el = inputField.getElement();
+    const el = inputField.getInputElement();
 
     el.value = 'test';
     el.dispatchEvent(new Event('input'));
@@ -132,7 +132,7 @@ describe('InputField Debounce Behavior', () => {
   });
 
   it('debounce delay is exactly 300ms (fires at 300, not at 299)', () => {
-    const el = inputField.getElement();
+    const el = inputField.getInputElement();
 
     el.value = 'x';
     el.dispatchEvent(new Event('input'));
@@ -146,7 +146,7 @@ describe('InputField Debounce Behavior', () => {
   });
 
   it('multiple destroy() calls are safe (no errors)', () => {
-    const el = inputField.getElement();
+    const el = inputField.getInputElement();
 
     el.value = 'hello';
     el.dispatchEvent(new Event('input'));
