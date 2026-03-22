@@ -14,7 +14,10 @@ A Progressive Web App for managing grocery shopping lists with offline functiona
 - Filter by checked/unchecked status
 - Auto-collapse empty sections based on active filter
 - List sharing via URL (lz-string compression) with Web Share API and clipboard fallback
-- List import from shared URLs
+- List import from shared URLs with merge support (new items and unchecked items sync automatically)
+- In-app link import UI for pasting share links inside the installed PWA
+- iOS browser-to-PWA redirect banner for shared links
+- PWA install prompt after importing a shared list
 - Force update button for service worker cache clearing
 - Dark theme UI
 - Responsive design for mobile and tablet
@@ -72,15 +75,21 @@ grocery-list-pwa/
 ├── src/
 │   ├── components/
 │   │   ├── FilterControl.ts    # Filter mode toggle (all/checked/unchecked)
-│   │   ├── InputField.ts       # Search input with debounce
+│   │   ├── InputField.ts       # Search input with debounce and clear button
 │   │   ├── Item.ts             # Grocery item row (check, quantity, delete, drag)
+│   │   ├── LinkImportUI.ts     # Paste-a-link import panel for standalone PWA
 │   │   ├── ListSelector.ts     # Dropdown list switcher with rename/delete
+│   │   ├── PwaRedirectBanner.ts # iOS browser-to-PWA redirect banner
 │   │   └── Section.ts          # Collapsible section with inline add, reorder, rename
 │   ├── styles/
 │   │   └── main.css            # Global styles (dark theme)
+│   ├── browser-context-detector.ts # Standalone/browser/iOS detection
+│   ├── clipboard-helper.ts     # Cross-browser clipboard copy utility
 │   ├── forceUpdate.ts          # SW update + cache clear + reload utility
 │   ├── import-controller.ts    # URL import detection and decoding
 │   ├── index.ts                # AppShell — main orchestrator
+│   ├── install-prompt.ts       # PWA install prompt logic
+│   ├── merge-engine.ts         # Three-way list merge for collaboration
 │   ├── serializer.ts           # GroceryList ↔ portable JSON for sharing
 │   ├── share-controller.ts     # Web Share API + clipboard fallback
 │   ├── state.ts                # StateManager with reducer (multi-list)
@@ -101,7 +110,7 @@ The app follows a component-based architecture using vanilla TypeScript (no fram
 
 - **AppShell** (`src/index.ts`): Main application component that orchestrates all other components, handles rendering, and wires up event handlers
 - **StateManager** (`src/state.ts`): Centralized state management with action dispatching over `MultiListState`. Item/section actions are scoped to the active list. Includes auto-collapse engine for sections with no visible items.
-- **Components**: Reusable class-based UI components (InputField, FilterControl, Section, Item, ListSelector). Each owns its DOM element and communicates via callbacks.
+- **Components**: Reusable class-based UI components (InputField, FilterControl, Section, Item, ListSelector, LinkImportUI, PwaRedirectBanner). Each owns its DOM element and communicates via callbacks.
 - **Storage Layer** (`src/storage.ts`): localStorage persistence with v2 multi-list schema, v1→v2 migration, validation, and error handling
 - **Sharing Pipeline**: Four pure-logic modules handle zero-backend list sharing via URL:
   - `serializer.ts` — converts `GroceryList` ↔ portable JSON (no IDs/timestamps)
@@ -109,6 +118,8 @@ The app follows a component-based architecture using vanilla TypeScript (no fram
   - `share-controller.ts` — Web Share API with clipboard fallback (dependency-injected)
   - `import-controller.ts` — detects `?list=` on page load, decodes, returns result
 - **Force Update** (`src/forceUpdate.ts`): Pure-logic utility for SW update check → cache clear → reload
+- **Merge Engine** (`src/merge-engine.ts`): Three-way list merge that adds new items and unchecks re-added items when importing a shared list that already exists locally
+- **Install Prompt** (`src/install-prompt.ts`): PWA install banner shown after importing a shared list, with iOS-specific instructions
 - **Service Worker** (`public/sw.js`): Offline functionality with cache-first strategy
 
 ### Testing the App

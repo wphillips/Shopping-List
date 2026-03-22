@@ -987,10 +987,13 @@ class AppShell {
         <p>A shopping list app that works offline and keeps your groceries organized.</p>
         <h2>Features</h2>
         <ul>
-          <li><strong>Movable Sections</strong> — Reorder your grocery sections to match your store layout.</li>
-          <li><strong>Sharing</strong> — Share your list with others via a link.</li>
-          <li><strong>Offline Support</strong> — Works without an internet connection as a PWA.</li>
-          <li><strong>Multiple Lists</strong> — Manage more than one list.</li>
+          <li><strong>Multiple Lists</strong> — Create, rename, and switch between separate grocery lists.</li>
+          <li><strong>Sections</strong> — Organize items into movable, collapsible sections that match your store layout.</li>
+          <li><strong>Quantities</strong> — Track how many of each item you need with +/− controls.</li>
+          <li><strong>Search &amp; Filter</strong> — Find items by name or filter by checked/unchecked status.</li>
+          <li><strong>Drag &amp; Drop</strong> — Move items between sections by dragging.</li>
+          <li><strong>Sharing &amp; Merging</strong> — Share a list via link. Re-sharing merges changes instead of duplicating.</li>
+          <li><strong>Offline Support</strong> — Works without an internet connection as an installable PWA.</li>
         </ul>
         <footer class="about-footer">
           <span class="build-timestamp">${__BUILD_TIMESTAMP__}</span>
