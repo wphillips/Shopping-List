@@ -109,109 +109,89 @@ describe('CloudFront Distribution Configuration', () => {
   });
 });
 
-describe('CloudFront Cache Policies', () => {
+describe('CloudFront Managed Cache Policies', () => {
   const cf = readInfraFile('cloudfront.tf');
 
-  // Helper to extract a cache policy block by resource name
-  function getCachePolicyBlock(resourceName: string): string {
-    const regex = new RegExp(
-      `resource\\s+"aws_cloudfront_cache_policy"\\s+"${resourceName}"\\s*\\{[^]*?\\n\\}`,
-      's'
+  // Validates: 1.2
+  it('contains no custom aws_cloudfront_cache_policy resource blocks', () => {
+    expect(cf).not.toMatch(/resource\s+"aws_cloudfront_cache_policy"/);
+  });
+
+  // Validates: 1.1
+  it('default behavior uses CachingOptimized managed policy', () => {
+    const defaultBlock = cf.match(/default_cache_behavior\s*\{[\s\S]*?\n  \}/);
+    expect(defaultBlock).not.toBeNull();
+    expect(defaultBlock![0]).toContain('658327ea-f89d-4fab-a63d-7e88639e58f6');
+  });
+
+  // Validates: 1.1
+  it('/assets/* behavior uses CachingOptimized managed policy', () => {
+    const assetsBlock = cf.match(
+      /ordered_cache_behavior\s*\{[\s\S]*?path_pattern\s*=\s*"\/assets\/\*"[\s\S]*?\n  \}/
     );
-    const match = cf.match(regex);
-    expect(match).not.toBeNull();
-    return match![0];
-  }
+    expect(assetsBlock).not.toBeNull();
+    expect(assetsBlock![0]).toContain('658327ea-f89d-4fab-a63d-7e88639e58f6');
+  });
 
-  // Validates: 6.1
-  it('/assets/* cache policy has TTL of 31536000', () => {
-    const block = getCachePolicyBlock('assets_cache');
-    expect(block).toMatch(/default_ttl\s*=\s*31536000/);
-    expect(block).toMatch(/min_ttl\s*=\s*31536000/);
-    expect(block).toMatch(/max_ttl\s*=\s*31536000/);
-    // Verify the ordered_cache_behavior references this policy
+  // Validates: 1.1
+  it('index.html behavior uses CachingDisabled managed policy', () => {
+    const indexBlock = cf.match(
+      /ordered_cache_behavior\s*\{[\s\S]*?path_pattern\s*=\s*"index\.html"[\s\S]*?\n  \}/
+    );
+    expect(indexBlock).not.toBeNull();
+    expect(indexBlock![0]).toContain('4135ea2d-6df8-44a3-9df3-4b5a84be39ad');
+  });
+
+  // Validates: 1.1
+  it('sw.js behavior uses CachingDisabled managed policy', () => {
+    const swBlock = cf.match(
+      /ordered_cache_behavior\s*\{[\s\S]*?path_pattern\s*=\s*"sw\.js"[\s\S]*?\n  \}/
+    );
+    expect(swBlock).not.toBeNull();
+    expect(swBlock![0]).toContain('4135ea2d-6df8-44a3-9df3-4b5a84be39ad');
+  });
+
+  // Validates: 2.1
+  it('has exactly 3 ordered cache behaviors (within 5 max total)', () => {
+    const orderedBehaviors = cf.match(/ordered_cache_behavior\s*\{/g) || [];
+    expect(orderedBehaviors.length).toBe(3);
+  });
+
+  // Validates: 2.2
+  it('retains /assets/*, index.html, and sw.js path patterns', () => {
     expect(cf).toMatch(/path_pattern\s*=\s*"\/assets\/\*"/);
-  });
-
-  // Validates: 6.2
-  it('index.html cache policy has TTL of 0', () => {
-    const block = getCachePolicyBlock('index_cache');
-    expect(block).toMatch(/default_ttl\s*=\s*0/);
-    expect(block).toMatch(/min_ttl\s*=\s*0/);
-    expect(block).toMatch(/max_ttl\s*=\s*0/);
     expect(cf).toMatch(/path_pattern\s*=\s*"index\.html"/);
-  });
-
-  // Validates: 6.3
-  it('sw.js cache policy has TTL of 0', () => {
-    const block = getCachePolicyBlock('sw_cache');
-    expect(block).toMatch(/default_ttl\s*=\s*0/);
-    expect(block).toMatch(/min_ttl\s*=\s*0/);
-    expect(block).toMatch(/max_ttl\s*=\s*0/);
     expect(cf).toMatch(/path_pattern\s*=\s*"sw\.js"/);
   });
 
-  // Validates: 6.4
-  it('manifest.webmanifest cache policy has TTL of 3600', () => {
-    const block = getCachePolicyBlock('manifest_cache');
-    expect(block).toMatch(/default_ttl\s*=\s*3600/);
-    expect(block).toMatch(/min_ttl\s*=\s*3600/);
-    expect(block).toMatch(/max_ttl\s*=\s*3600/);
-    expect(cf).toMatch(/path_pattern\s*=\s*"manifest\.webmanifest"/);
-  });
-
-  // Validates: 6.5
-  it('/icons/* cache policy has TTL of 604800', () => {
-    const block = getCachePolicyBlock('icons_cache');
-    expect(block).toMatch(/default_ttl\s*=\s*604800/);
-    expect(block).toMatch(/min_ttl\s*=\s*604800/);
-    expect(block).toMatch(/max_ttl\s*=\s*604800/);
-    expect(cf).toMatch(/path_pattern\s*=\s*"\/icons\/\*"/);
-  });
-
-  it('default cache policy has TTL of 86400', () => {
-    const block = getCachePolicyBlock('default_cache');
-    expect(block).toMatch(/default_ttl\s*=\s*86400/);
-    expect(block).toMatch(/min_ttl\s*=\s*86400/);
-    expect(block).toMatch(/max_ttl\s*=\s*86400/);
+  // Validates: 2.3
+  it('does not have manifest.webmanifest or /icons/* ordered behaviors', () => {
+    expect(cf).not.toMatch(/path_pattern\s*=\s*"manifest\.webmanifest"/);
+    expect(cf).not.toMatch(/path_pattern\s*=\s*"\/icons\/\*"/);
   });
 });
 
 describe('CloudFront Security Response Headers', () => {
   const cf = readInfraFile('cloudfront.tf');
 
-  // Validates: 7.1
-  it('includes HSTS with max-age=31536000 and includeSubDomains', () => {
-    expect(cf).toMatch(/access_control_max_age_sec\s*=\s*31536000/);
-    expect(cf).toMatch(/include_subdomains\s*=\s*true/);
+  // Validates: 3.2
+  it('contains no custom aws_cloudfront_response_headers_policy resource blocks', () => {
+    expect(cf).not.toMatch(/resource\s+"aws_cloudfront_response_headers_policy"/);
   });
 
-  // Validates: 7.2
-  it('includes X-Content-Type-Options nosniff', () => {
-    expect(cf).toContain('content_type_options');
-  });
+  // Validates: 3.1
+  it('all cache behaviors reference the managed SecurityHeadersPolicy ID', () => {
+    const managedSecurityHeadersPolicyId = '67f7725c-6f97-4210-82d7-5512b31e9d03';
 
-  // Validates: 7.3
-  it('includes X-Frame-Options DENY', () => {
-    expect(cf).toMatch(/frame_option\s*=\s*"DENY"/);
-  });
-
-  // Validates: 7.4
-  it('includes Referrer-Policy strict-origin-when-cross-origin', () => {
-    expect(cf).toMatch(/referrer_policy\s*=\s*"strict-origin-when-cross-origin"/);
-  });
-
-  // Validates: 7.5
-  it('response headers policy is attached to all cache behaviors', () => {
     // Count how many cache behaviors exist (default + ordered)
     const defaultBehaviors = cf.match(/default_cache_behavior\s*\{/g) || [];
     const orderedBehaviors = cf.match(/ordered_cache_behavior\s*\{/g) || [];
     const totalBehaviors = defaultBehaviors.length + orderedBehaviors.length;
 
-    // Count how many times response_headers_policy_id is referenced in behaviors
-    const policyRefs = cf.match(/response_headers_policy_id\s*=/g) || [];
+    // Count how many times the managed SecurityHeadersPolicy ID appears
+    const policyRefs = cf.match(new RegExp(managedSecurityHeadersPolicyId, 'g')) || [];
 
-    expect(totalBehaviors).toBeGreaterThan(0);
+    expect(totalBehaviors).toBe(4); // 1 default + 3 ordered
     expect(policyRefs.length).toBe(totalBehaviors);
   });
 });
