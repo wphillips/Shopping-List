@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Section Visual Hierarchy — Before / After</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background: #111;
+    color: #fff;
+    padding: 1.5rem;
+    line-height: 1.4;
+  }
+  h1 { text-align: center; font-size: 1.25rem; margin-bottom: 1.5rem; color: #b0b0b0; font-weight: 400; }
+  .compare { display: flex; gap: 2rem; justify-content: center; flex-wrap: wrap; }
+  .panel { flex: 1; min-width: 320px; max-width: 480px; }
+  .panel-label {
+    text-align: center; font-size: 0.8125rem; text-transform: uppercase;
+    letter-spacing: 0.1em; color: #707070; margin-bottom: 0.75rem;
+  }
+
+  /* === Shared base === */
+  .section { border: 1px solid #404040; border-radius: 6px; margin-bottom: 0.625rem; overflow: hidden; }
+  .section-header {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 0.5rem 0.75rem; border-bottom: 1px solid #404040;
+    min-height: 44px; cursor: default; user-select: none;
+  }
+  .section-title { display: flex; align-items: center; gap: 0.5rem; flex: 1; }
+  .chevron { font-size: 0.75rem; }
+  .controls { display: flex; gap: 0.25rem; }
+  .controls span { display: inline-flex; align-items: center; justify-content: center; width: 32px; height: 32px; border-radius: 4px; font-size: 0.875rem; color: #b0b0b0; }
+  .item {
+    display: flex; align-items: center; gap: 0.5rem;
+    padding: 0.5rem 0.75rem; border-bottom: 1px solid #404040;
+  }
+  .item:last-child { border-bottom: none; }
+  .cb { width: 20px; height: 20px; accent-color: #4a9eff; }
+  .item.checked { background: #2a3a2a; }
+  .item.checked .name { color: #90a090; text-decoration: line-through; }
+  .qty { color: #b0b0b0; font-size: 0.875rem; margin-left: auto; }
+
+  /* === BEFORE (current) === */
+  .before .section { background: #2d2d2d; }
+  .before .section-header { background: #3a3a3a; }
+  .before .section-title { font-size: 1rem; font-weight: 500; color: #ffffff; }
+  .before .name { font-size: 0.9375rem; color: #ffffff; }
+
+  /* === AFTER (proposed) === */
+  .after .section { background: #2d2d2d; }
+  .after .section-header { background: #2d2d2d; padding: 0.25rem 0.75rem; min-height: auto; }
+  .after .section-title {
+    font-size: 0.8125rem; font-weight: 400; color: #b0b0b0;
+    text-transform: uppercase; letter-spacing: 0.05em;
+  }
+  .after .name { font-size: 0.9375rem; color: #ffffff; }
+</style>
+</head>
+<body>
+
+<h1>Section Visual Hierarchy — Before vs After</h1>
+
+<div class="compare">
+  <!-- BEFORE -->
+  <div class="panel before">
+    <div class="panel-label">Current</div>
+
+    <div class="section">
+      <div class="section-header">
+        <div class="section-title"><span class="chevron">▼</span><span>Produce</span></div>
+        <div class="controls"><span>✏️</span><span>↑</span><span>↓</span><span>×</span></div>
+      </div>
+      <div class="item"><input type="checkbox" class="cb"><span class="name">Bananas</span><span class="qty">×3</span></div>
+      <div class="item"><input type="checkbox" class="cb"><span class="name">Avocados</span><span class="qty">×2</span></div>
+      <div class="item checked"><input type="checkbox" class="cb" checked><span class="name">Spinach</span><span class="qty">×1</span></div>
+      <div class="item"><input type="checkbox" class="cb"><span class="name">Tomatoes</span><span class="qty">×4</span></div>
+    </div>
+
+    <div class="section">
+      <div class="section-header">
+        <div class="section-title"><span class="chevron">▼</span><span>Dairy</span></div>
+        <div class="controls"><span>✏️</span><span>↑</span><span>↓</span><span>×</span></div>
+      </div>
+      <div class="item"><input type="checkbox" class="cb"><span class="name">Whole milk</span><span class="qty">×1</span></div>
+      <div class="item"><input type="checkbox" class="cb"><span class="name">Greek yogurt</span><span class="qty">×2</span></div>
+      <div class="item"><input type="checkbox" class="cb"><span class="name">Cheddar cheese</span><span class="qty">×1</span></div>
+    </div>
+
+    <div class="section">
+      <div class="section-header">
+        <div class="section-title"><span class="chevron">▼</span><span>Pantry</span></div>
+        <div class="controls"><span>✏️</span><span>↑</span><span>↓</span><span>×</span></div>
+      </div>
+      <div class="item"><input type="checkbox" class="cb"><span class="name">Olive oil</span><span class="qty">×1</span></div>
+      <div class="item checked"><input type="checkbox" class="cb" checked><span class="name">Rice</span><span class="qty">×1</span></div>
+      <div class="item"><input type="checkbox" class="cb"><span class="name">Black beans</span><span class="qty">×3</span></div>
+      <div class="item"><input type="checkbox" class="cb"><span class="name">Pasta</span><span class="qty">×2</span></div>
+      <div class="item"><input type="checkbox" class="cb"><span class="name">Peanut butter</span><span class="qty">×1</span></div>
+    </div>
+  </div>
+
+  <!-- AFTER -->
+  <div class="panel after">
+    <div class="panel-label">Proposed</div>
+
+    <div class="section">
+      <div class="section-header">
+        <div class="section-title"><span class="chevron">▼</span><span>Produce</span></div>
+        <div class="controls"><span>✏️</span><span>↑</span><span>↓</span><span>×</span></div>
+      </div>
+      <div class="item"><input type="checkbox" class="cb"><span class="name">Bananas</span><span class="qty">×3</span></div>
+      <div class="item"><input type="checkbox" class="cb"><span class="name">Avocados</span><span class="qty">×2</span></div>
+      <div class="item checked"><input type="checkbox" class="cb" checked><span class="name">Spinach</span><span class="qty">×1</span></div>
+      <div class="item"><input type="checkbox" class="cb"><span class="name">Tomatoes</span><span class="qty">×4</span></div>
+    </div>
+
+    <div class="section">
+      <div class="section-header">
+        <div class="section-title"><span class="chevron">▼</span><span>Dairy</span></div>
+        <div class="controls"><span>✏️</span><span>↑</span><span>↓</span><span>×</span></div>
+      </div>
+      <div class="item"><input type="checkbox" class="cb"><span class="name">Whole milk</span><span class="qty">×1</span></div>
+      <div class="item"><input type="checkbox" class="cb"><span class="name">Greek yogurt</span><span class="qty">×2</span></div>
+      <div class="item"><input type="checkbox" class="cb"><span class="name">Cheddar cheese</span><span class="qty">×1</span></div>
+    </div>
+
+    <div class="section">
+      <div class="section-header">
+        <div class="section-title"><span class="chevron">▼</span><span>Pantry</span></div>
+        <div class="controls"><span>✏️</span><span>↑</span><span>↓</span><span>×</span></div>
+      </div>
+      <div class="item"><input type="checkbox" class="cb"><span class="name">Olive oil</span><span class="qty">×1</span></div>
+      <div class="item checked"><input type="checkbox" class="cb" checked><span class="name">Rice</span><span class="qty">×1</span></div>
+      <div class="item"><input type="checkbox" class="cb"><span class="name">Black beans</span><span class="qty">×3</span></div>
+      <div class="item"><input type="checkbox" class="cb"><span class="name">Pasta</span><span class="qty">×2</span></div>
+      <div class="item"><input type="checkbox" class="cb"><span class="name">Peanut butter</span><span class="qty">×1</span></div>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>

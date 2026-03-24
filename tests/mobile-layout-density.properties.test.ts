@@ -154,9 +154,9 @@ describe('Property 3: Section header compactness', () => {
    * shall be no greater than 36px.
    *
    * We verify this by parsing the CSS and checking that the `.section-header` rule
-   * inside the mobile media query has `padding: 4px 0.5rem` and `min-height: 36px`.
+   * inside the mobile media query has `padding: 0.25rem 0.5rem` and `min-height: auto`.
    */
-  it('should have .section-header with padding 4px 0.5rem and min-height 36px in mobile media query', () => {
+  it('should have .section-header with padding 0.25rem 0.5rem and min-height auto in mobile media query', () => {
     fc.assert(
       fc.property(
         fc.integer({ min: 320, max: 767 }),
@@ -168,10 +168,10 @@ describe('Property 3: Section header compactness', () => {
           expect(sectionHeaderRule).toBeDefined();
 
           const padding = getPropertyValue(sectionHeaderRule!, 'padding');
-          expect(padding).toBe('4px 0.5rem');
+          expect(padding).toBe('0.25rem 0.5rem');
 
           const minHeight = getPropertyValue(sectionHeaderRule!, 'min-height');
-          expect(minHeight).toBe('36px');
+          expect(minHeight).toBe('auto');
         }
       ),
       { numRuns: 100 }
@@ -223,9 +223,9 @@ describe('Property 5: Section title font size', () => {
    *
    * We verify this by parsing the CSS and checking that the `.section-title` rule
    * inside the mobile media query has a font-size value in rem that falls within
-   * the [0.9, 1.0] range. The actual value is 0.9375rem.
+   * the [0.7, 1.0] range. The actual value is 0.75rem.
    */
-  it('should have .section-title with font-size between 0.9rem and 1rem in mobile media query', () => {
+  it('should have .section-title with font-size between 0.7rem and 1rem in mobile media query', () => {
     fc.assert(
       fc.property(
         fc.integer({ min: 320, max: 767 }),
@@ -244,7 +244,7 @@ describe('Property 5: Section title font size', () => {
           expect(remMatch).not.toBeNull();
 
           const remValue = parseFloat(remMatch![1]);
-          expect(remValue).toBeGreaterThanOrEqual(0.9);
+          expect(remValue).toBeGreaterThanOrEqual(0.7);
           expect(remValue).toBeLessThanOrEqual(1);
         }
       ),

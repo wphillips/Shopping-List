@@ -236,22 +236,24 @@ button.danger:hover {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0.5rem 0.75rem;
-  background-color: var(--bg-tertiary);
+  padding: 0.25rem 0.75rem;
+  background-color: var(--bg-secondary);
   border-bottom: 1px solid var(--border);
   cursor: pointer;
   user-select: none;
-  min-height: 44px;
+  min-height: auto;
 }
 
 .section-header:hover {
-  background-color: var(--bg-hover);
+  background-color: var(--bg-tertiary);
 }
 
 .section-title {
-  font-size: 1rem;
-  font-weight: 500;
-  color: var(--text-primary);
+  font-size: 0.8125rem;
+  font-weight: 400;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
   flex: 1;
 }
 
@@ -705,8 +707,8 @@ button.danger:hover {
   }
 
   .section-header {
-    min-height: 36px;
-    padding: 4px 0.5rem;
+    min-height: auto;
+    padding: 0.25rem 0.5rem;
   }
 
   .section-controls button {
@@ -715,7 +717,7 @@ button.danger:hover {
   }
 
   .section-title {
-    font-size: 0.9375rem;
+    font-size: 0.75rem;
   }
 
   .section-content {
@@ -939,7 +941,7 @@ button.danger:hover {
   }
 
   .section-header {
-    padding: 0.625rem 1rem;
+    padding: 0.25rem 1rem;
   }
 }
 
